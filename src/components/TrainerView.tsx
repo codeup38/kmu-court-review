@@ -399,6 +399,12 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
     ? Boolean(answers[currentQuestion.id])
     : false;
 
+  const goQuestion = (nextIdx: number) => {
+    const clamped = Math.max(0, Math.min(filteredQuestions.length - 1, nextIdx));
+    setCurrentIndex(clamped);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   useEffect(() => {
     if (viewMode !== 'single' || !currentQuestion || isOverlayOpen) return;
 
@@ -416,12 +422,18 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
 
       if (e.key === 'ArrowLeft') {
         e.preventDefault();
-        setCurrentIndex((prev) => Math.max(0, prev - 1));
+        setCurrentIndex((prev) => {
+          const next = Math.max(0, prev - 1);
+          if (next !== prev) window.scrollTo({ top: 0, behavior: 'smooth' });
+          return next;
+        });
       } else if (e.key === 'ArrowRight') {
         e.preventDefault();
-        setCurrentIndex((prev) =>
-          Math.min(filteredQuestions.length - 1, prev + 1)
-        );
+        setCurrentIndex((prev) => {
+          const next = Math.min(filteredQuestions.length - 1, prev + 1);
+          if (next !== prev) window.scrollTo({ top: 0, behavior: 'smooth' });
+          return next;
+        });
       } else if (
         !isCurrentGraded &&
         currentQuestion.type === 'mcq' &&
@@ -604,9 +616,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
               <div className="justify-self-start">
                 <button
                   type="button"
-                  onClick={() =>
-                    setCurrentIndex((prev) => Math.max(0, prev - 1))
-                  }
+                  onClick={() => goQuestion(currentIndex - 1)}
                   disabled={currentIndex === 0}
                   className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-[13px] sm:text-sm font-bold border border-slate-300 text-slate-700 hover:border-[#0f172a] disabled:opacity-35 disabled:pointer-events-none"
                 >
@@ -622,11 +632,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
               <div className="justify-self-end">
                 <button
                   type="button"
-                  onClick={() =>
-                    setCurrentIndex((prev) =>
-                      Math.min(filteredQuestions.length - 1, prev + 1)
-                    )
-                  }
+                  onClick={() => goQuestion(currentIndex + 1)}
                   disabled={currentIndex >= filteredQuestions.length - 1}
                   className="inline-flex items-center gap-1.5 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-lg text-[13px] sm:text-sm font-extrabold bg-[#0f172a] text-white hover:bg-[#1e3a8a] disabled:opacity-35 disabled:pointer-events-none"
                 >
@@ -655,7 +661,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
                   <button
                     key={q.id}
                     type="button"
-                    onClick={() => setCurrentIndex(idx)}
+                    onClick={() => goQuestion(idx)}
                     className={`${
                       filteredQuestions.length > 8 ? 'w-full sm:w-8' : 'w-8'
                     } h-8 rounded-md text-xs font-extrabold tabular-nums transition-all ${pill} ${
