@@ -14,7 +14,7 @@
     letter-spacing: -0.02em;
     word-break: keep-all;
     overflow-wrap: break-word;
-    background-color: #f1f5f9;
+    background-color: #eef2f6;
     color: #0f172a;
     -webkit-font-smoothing: antialiased;
   }
@@ -25,12 +25,12 @@
 }
 
 @layer components {
-  /* PPT 13번 슬라이드 핵심 밑줄 & 취소선 스타일 계승 */
+  /* 결정적 구절에만 절제해서 쓰는 형광펜/밑줄 강조 */
   .key-underline {
     color: #1e3a8a;
     font-weight: 800;
-    border-bottom: 2.5px solid #93c5fd;
-    padding-bottom: 1px;
+    background: linear-gradient(to top, #dbeafe 38%, transparent 38%);
+    padding: 0 2px;
   }
 
   .err-strike {
@@ -39,12 +39,11 @@
     text-decoration-thickness: 2.5px;
     text-decoration-color: #b91c1c;
     background-color: #fee2e2;
-    padding: 1px 4px;
-    border-radius: 3px;
+    padding: 1px 5px;
+    border-radius: 4px;
   }
 }
 
-/* 깔끔한 스크롤바 */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;

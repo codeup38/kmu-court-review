@@ -88,7 +88,7 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
     <div className="fixed inset-0 z-50 flex justify-end">
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-[1px]"
+        className="fixed inset-0 bg-slate-900/45 backdrop-blur-[1px]"
       />
 
       <aside
@@ -101,8 +101,8 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
             <h2 className="text-xl font-extrabold text-[#0f172a]">
               AI 질문 템플릿
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
-              직접 답변하는 챗봇이 아니라, 사법부 복습에 최적화된 질문 프롬프트를 복사해 AI에 붙여넣어 활용하는 도구입니다.
+            <p className="text-sm text-slate-500 leading-relaxed">
+              사법부 복습에 최적화된 질문 프롬프트를 복사해 AI에 붙여넣어 활용하는 도구입니다.
             </p>
           </div>
           <button
@@ -119,7 +119,7 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {/* 1. 템플릿 선택 */}
           <div className="space-y-2.5">
-            <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center justify-between text-[15px]">
               <span className="font-extrabold text-[#0f172a]">
                 1. 필요한 질문 템플릿 선택
               </span>
@@ -130,7 +130,7 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
               )}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {TEMPLATES.map((tpl) => {
                 const active = selectedPreset === tpl.id;
                 return (
@@ -147,7 +147,7 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
                         : 'bg-white border-slate-200 hover:border-slate-300'
                     }`}
                   >
-                    <div className="text-[15.5px] font-extrabold text-[#0f172a] mb-0.5">
+                    <div className="text-base font-extrabold text-[#0f172a] mb-0.5">
                       {tpl.title}
                     </div>
                     <p className="text-sm text-slate-600 leading-relaxed">
@@ -163,7 +163,7 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
           <div className="space-y-2">
             <label
               htmlFor="drawer-custom-memo"
-              className="block text-sm font-extrabold text-[#0f172a]"
+              className="block text-[15px] font-extrabold text-[#0f172a]"
             >
               2. 특별히 궁금한 점 덧붙이기{' '}
               <span className="font-semibold text-slate-400">(선택)</span>
@@ -177,25 +177,25 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
                 setCopiedState(false);
               }}
               placeholder="예: 대법관회의와 대법원 심판 합의체의 차이를 쉽게 비교해 줘"
-              className="w-full px-4 py-3 rounded-xl text-sm bg-slate-50 focus:bg-white border border-slate-300 text-[#0f172a] focus:outline-none focus:border-[#1e3a8a]"
+              className="w-full px-4 py-3 rounded-xl text-[15px] bg-slate-50 focus:bg-white border border-slate-300 text-[#0f172a] focus:outline-none focus:border-[#1e3a8a]"
             />
           </div>
 
           {/* 3. 복사 및 미리보기 */}
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             <button
               type="button"
               onClick={() => copyPromptToClipboard(generatedPrompt)}
-              className={`w-full py-3.5 px-4 rounded-xl text-sm sm:text-base font-extrabold transition-colors flex items-center justify-center gap-2 shadow-sm ${
+              className={`w-full py-3.5 px-4 rounded-xl text-base font-extrabold transition-colors flex items-center justify-center gap-2 shadow-sm ${
                 copiedState
-                  ? 'bg-[#0f766e] text-white'
+                  ? 'bg-emerald-700 text-white'
                   : 'bg-[#0f172a] text-white hover:bg-[#1e3a8a]'
               }`}
             >
               {copiedState ? (
                 <>
-                  <Check className="w-4 h-4" />
-                  <span>프롬프트 복사 완료 — 아래 AI에 붙여넣기 하세요</span>
+                  <Check className="w-5 h-5" />
+                  <span>프롬프트 복사 완료 — AI 채팅창에 붙여넣기 하세요</span>
                 </>
               ) : (
                 <>
@@ -208,33 +208,35 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
             <button
               type="button"
               onClick={() => setPreviewOpen((prev) => !prev)}
-              className="w-full py-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1"
+              className="w-full py-1.5 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1"
             >
               <span>
-                {previewOpen ? '프롬프트 전문 닫기' : '복사될 프롬프트 전문 미리보기'}
+                {previewOpen ? '프롬프트 전문 닫기' : '복사될 프롬프트 전문 확인하기'}
               </span>
               {previewOpen ? (
-                <ChevronUp className="w-3.5 h-3.5" />
+                <ChevronUp className="w-4 h-4" />
               ) : (
-                <ChevronDown className="w-3.5 h-3.5" />
+                <ChevronDown className="w-4 h-4" />
               )}
             </button>
 
             {previewOpen && (
-              <pre className="w-full max-h-56 overflow-y-auto rounded-xl bg-slate-900 text-slate-100 p-4 text-xs leading-relaxed whitespace-pre-wrap font-sans">
+              <pre className="w-full max-h-56 overflow-y-auto rounded-xl bg-slate-900 text-slate-100 p-4 text-[13px] leading-relaxed whitespace-pre-wrap font-sans">
                 {generatedPrompt}
               </pre>
             )}
           </div>
 
-          {/* 4. 학교 무료 제공 AI 안내 및 바로가기 */}
-          <div className="rounded-xl border border-[#93c5fd] bg-[#eff6ff]/70 p-4 space-y-3">
-            <p className="text-xs sm:text-[13.5px] text-slate-700 leading-relaxed">
-              <strong>
-                무제한 모델 대신 ChatGPT 6.2 Sol, Claude Opus 5.5 등 최신 모델 사용을 권장합니다.
-              </strong>{' '}
-              학교 무료 제공 AI(FactChat)에 온국민 포털 계정으로 로그인 후 붙여넣으면 바로 이용할 수 있습니다.
-            </p>
+          {/* 4-A. 학교 무료 제공 AI 전용 박스 */}
+          <div className="rounded-xl border-2 border-[#1e3a8a]/25 bg-[#eff6ff]/75 p-5 space-y-3.5">
+            <div className="space-y-1.5">
+              <div className="text-[15.5px] font-extrabold text-[#1e3a8a]">
+                학교 무료 제공 AI로 바로 질문하기 (추천)
+              </div>
+              <p className="text-[14.5px] text-slate-800 leading-relaxed font-medium">
+                학교 무료 제공 AI(FactChat)에 <strong>학교 계정(온국민 포털)으로 로그인만 하면</strong> 별도 비용 없이 유료 AI로 바로 복습할 수 있습니다.
+              </p>
+            </div>
 
             <a
               href={SCHOOL_AI_URL}
@@ -243,13 +245,26 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
               onClick={() => {
                 if (!copiedState) copyPromptToClipboard(generatedPrompt);
               }}
-              className="w-full py-3 px-4 rounded-xl text-sm font-extrabold bg-[#1e3a8a] text-white hover:bg-[#0f172a] transition-colors flex items-center justify-center gap-2 shadow-sm"
+              className="w-full py-3.5 px-4 rounded-xl text-[15px] font-extrabold bg-[#1e3a8a] text-white hover:bg-[#0f172a] transition-colors flex items-center justify-center gap-2 shadow-sm"
             >
-              <span>학교 무료 제공 AI 열기 (FactChat · 온국민 포털 로그인)</span>
+              <span>학교 무료 제공 AI 열기 (온국민 포털 로그인)</span>
               <ExternalLink className="w-4 h-4 shrink-0" />
             </a>
 
-            <div className="grid grid-cols-3 gap-2 pt-1">
+            <p className="text-xs sm:text-[13.5px] text-slate-600 leading-relaxed bg-white/80 rounded-lg px-3.5 py-2.5 border border-[#93c5fd]/60">
+              <strong className="text-[#1e3a8a] font-extrabold mr-1">
+                학교 AI 모델 선택 팁 :
+              </strong>
+              무제한 무료 모델 대신 <strong>ChatGPT 6.2 Sol, Claude Opus 5.5 등 최신 모델</strong> 사용을 권장합니다.
+            </p>
+          </div>
+
+          {/* 4-B. 개인 구독 AI 계정 영역 (완전히 분리) */}
+          <div className="pt-2 border-t border-slate-200 space-y-2">
+            <span className="text-xs sm:text-sm font-semibold text-slate-500 block">
+              개인 구독 AI 계정에 붙여넣기
+            </span>
+            <div className="grid grid-cols-3 gap-2">
               {PERSONAL_AI_LINKS.map((item) => (
                 <a
                   key={item.label}
@@ -259,10 +274,10 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
                   onClick={() => {
                     if (!copiedState) copyPromptToClipboard(generatedPrompt);
                   }}
-                  className="inline-flex items-center justify-center gap-1 px-2.5 py-2 rounded-lg text-xs font-bold bg-white border border-slate-300 text-slate-700 hover:border-[#1e3a8a] hover:text-[#1e3a8a]"
+                  className="inline-flex items-center justify-center gap-1 px-2.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-slate-50 border border-slate-300 text-slate-700 hover:bg-white hover:border-[#0f172a] hover:text-[#0f172a]"
                 >
                   <span>{item.label}</span>
-                  <ExternalLink className="w-3 h-3" />
+                  <ExternalLink className="w-3.5 h-3.5" />
                 </a>
               ))}
             </div>
