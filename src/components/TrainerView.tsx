@@ -1,18 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import {
   ArrowLeft,
   ArrowRight,
-  Bookmark,
-  Check,
   RotateCcw,
-  Shuffle,
 } from 'lucide-react';
-import { QUESTIONS_DATA, SPEED_DRILL_CARDS } from '../data/questionsData';
+import { QUESTIONS_DATA } from '../data/questionsData';
 import {
   InstantPromptModalData,
   QuestionItem,
-  SpeedDrillCard,
   UserAnswerRecord,
 } from '../types';
 import {
@@ -20,19 +15,17 @@ import {
   buildQuestionVariantPrompt,
 } from '../utils/promptEngine';
 
-type TrainerMode = 'focus' | 'list' | 'drill';
-type FilterKey = 'all' | 'exam' | 'variant' | 'ox' | 'review';
+type FilterKey = 'all' | 'exam' | 'variant' | 'ox' | 'wrong';
+type ViewMode = 'single' | 'list';
 
 interface TrainerViewProps {
   answers: Record<number, UserAnswerRecord>;
-  bookmarkedQuestions: number[];
   focusedQuestionId: number | null;
   isOverlayOpen: boolean;
   onClearFocusedQuestion: () => void;
   onSubmitAnswer: (questionId: number, selected: number | 'O' | 'X') => void;
   onClearSingleAnswer: (questionId: number) => void;
   onResetAllAnswers: () => void;
-  onToggleQuestionBookmark: (questionId: number) => void;
   onTriggerInstantPrompt: (data: InstantPromptModalData) => void;
 }
 
@@ -59,10 +52,8 @@ function renderInlineStrike(
 interface QuestionSheetProps {
   question: QuestionItem;
   record?: UserAnswerRecord;
-  isBookmarked: boolean;
   onSubmit: (selected: number | 'O' | 'X') => void;
   onRetry: () => void;
-  onToggleBookmark: () => void;
   onOpenExplainAI: () => void;
   onOpenVariantAI: () => void;
 }
@@ -70,10 +61,8 @@ interface QuestionSheetProps {
 const QuestionSheet: React.FC<QuestionSheetProps> = ({
   question,
   record,
-  isBookmarked,
   onSubmit,
   onRetry,
-  onToggleBookmark,
   onOpenExplainAI,
   onOpenVariantAI,
 }) => {
@@ -81,8 +70,8 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
 
   return (
     <article className="bg-white rounded-xl border border-slate-200/90 border-t-4 border-t-[#0f172a] p-6 sm:p-10 shadow-sm">
-      {/* 상단 출처 & 북마크 */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-6 border-b border-slate-200">
+      {/* 출처 헤더 */}
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-6 border-b border-slate-200">
         <div className="flex flex-wrap items-center gap-2.5">
           <span className="text-sm font-extrabold bg-[#0f172a] text-white px-3 py-1 rounded tabular-nums">
             문항 {question.id}
@@ -92,30 +81,19 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
           </span>
         </div>
 
-        <button
-          type="button"
-          onClick={onToggleBookmark}
-          className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-bold border transition-colors ${
-            isBookmarked
-              ? 'bg-[#1e3a8a] text-white border-[#1e3a8a]'
-              : 'bg-slate-50 text-slate-600 border-slate-300 hover:border-[#1e3a8a] hover:text-[#1e3a8a]'
-          }`}
-        >
-          {isBookmarked ? (
-            <>
-              <Check className="w-4 h-4" />
-              <span>저장됨</span>
-            </>
-          ) : (
-            <>
-              <Bookmark className="w-4 h-4" />
-              <span>헷갈림 저장</span>
-            </>
-          )}
-        </button>
+        {isGraded && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="inline-flex items-center gap-1 text-xs sm:text-sm font-bold text-slate-400 hover:text-[#0f172a]"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>다시 풀기</span>
+          </button>
+        )}
       </div>
 
-      {/* 질문 원문 (PPT 시험지 스케일 20~22px) */}
+      {/* 질문 */}
       <h3 className="text-lg sm:text-[22px] font-extrabold text-[#0f172a] leading-[1.52] mb-7">
         {question.type === 'ox' && isGraded && question.answer === 'X'
           ? renderInlineStrike(
@@ -126,7 +104,7 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
           : question.stem}
       </h3>
 
-      {/* 선지 영역 */}
+      {/* 선지 */}
       {question.type === 'mcq' && question.choices ? (
         <div className="space-y-3">
           {question.choices.map((choiceText, idx) => {
@@ -156,7 +134,7 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
                 key={choiceNum}
                 type="button"
                 onClick={() => onSubmit(choiceNum)}
-                className={`w-full text-left rounded-xl px-5 py-4 border transition-all flex items-baseline gap-3.5 ${boxStyle}`}
+                className={`w-full text-left rounded-xl px-4 sm:px-5 py-4 border transition-all flex items-baseline gap-3 sm:gap-3.5 ${boxStyle}`}
               >
                 <span
                   className={`text-lg sm:text-[19px] font-extrabold shrink-0 tabular-nums ${
@@ -168,7 +146,7 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
                   {CIRCLE_NUMS[idx]}
                 </span>
                 <div className="flex-1 space-y-1.5">
-                  <p className="text-[16.5px] sm:text-[18px] leading-[1.65] font-medium">
+                  <p className="text-[16px] sm:text-[18px] leading-[1.65] font-medium">
                     {renderInlineStrike(choiceText, xray?.wrongSpan, isGraded)}
                   </p>
                   {isGraded && (isAnswer || isSelected) && (
@@ -191,7 +169,7 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
           })}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-3.5 sm:gap-4">
           {(['O', 'X'] as const).map((oxVal) => {
             const isSelected = record?.selected === oxVal;
             const isAnswer = question.answer === oxVal;
@@ -215,13 +193,13 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
                 key={oxVal}
                 type="button"
                 onClick={() => onSubmit(oxVal)}
-                className={`rounded-xl py-5 px-6 border transition-all flex items-center justify-center gap-3 ${btnStyle}`}
+                className={`rounded-xl py-4 sm:py-5 px-4 sm:px-6 border transition-all flex items-center justify-center gap-2.5 sm:gap-3 ${btnStyle}`}
               >
                 <span className="text-2xl sm:text-3xl font-extrabold tabular-nums">
                   {oxVal}
                 </span>
                 <span className="text-base sm:text-lg font-bold">
-                  {oxVal === 'O' ? '옳은 설명' : '틀린 설명'}
+                  {oxVal === 'O' ? '옳다' : '틀리다'}
                 </span>
               </button>
             );
@@ -229,127 +207,99 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
         </div>
       )}
 
-      {/* 채점 후 오픈: 중첩 박스를 없앤 깔끔한 단일 해설 시트 (PPT 해설 슬라이드 감성) */}
-      <AnimatePresence>
-        {isGraded && record && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.2 }}
-            className="mt-8 pt-7 border-t-2 border-slate-900 space-y-6"
-          >
-            {/* 정오 판정 줄 */}
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-wrap items-center gap-3">
-                <span
-                  className={`px-3.5 py-1 rounded text-sm font-extrabold text-white ${
-                    record.isCorrect ? 'bg-[#1e3a8a]' : 'bg-[#b91c1c]'
-                  }`}
-                >
-                  {record.isCorrect ? '정답입니다' : '오답입니다'}
-                </span>
-                <span className="text-base sm:text-lg font-extrabold text-[#0f172a] tabular-nums">
-                  정답 :{' '}
-                  {question.type === 'mcq'
-                    ? `${CIRCLE_NUMS[Number(question.answer) - 1]}번`
-                    : question.answer}
-                </span>
+      {/* 채점 해설 영역 */}
+      {isGraded && record && (
+        <div className="mt-8 pt-7 border-t-2 border-slate-900 space-y-6">
+          <div className="flex flex-wrap items-center gap-3">
+            <span
+              className={`px-3.5 py-1 rounded text-sm font-extrabold text-white ${
+                record.isCorrect ? 'bg-[#1e3a8a]' : 'bg-[#b91c1c]'
+              }`}
+            >
+              {record.isCorrect ? '정답입니다' : '오답입니다'}
+            </span>
+            <span className="text-base sm:text-lg font-extrabold text-[#0f172a] tabular-nums">
+              정답 :{' '}
+              {question.type === 'mcq'
+                ? `${CIRCLE_NUMS[Number(question.answer) - 1]}번`
+                : question.answer}
+            </span>
+          </div>
+
+          {(question.type === 'mcq' || question.answer === 'X') && (
+            <div className="bg-[#f8fafc] rounded-xl border border-slate-200 border-l-[5px] border-l-[#b91c1c] p-5 space-y-3">
+              <div className="text-sm font-extrabold text-[#991b1b]">
+                함정 교정 포인트 ({question.trapTag})
               </div>
-
-              <button
-                type="button"
-                onClick={onRetry}
-                className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-500 hover:text-[#0f172a]"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>다시 풀기</span>
-              </button>
-            </div>
-
-            {/* PPT 취소선 → 파란 밑줄 교정 포인트 */}
-            {(question.type === 'mcq' || question.answer === 'X') && (
-              <div className="bg-[#f8fafc] rounded-xl border border-slate-200 border-l-[5px] border-l-[#b91c1c] p-5 space-y-3">
-                <div className="text-sm font-extrabold text-[#991b1b]">
-                  함정 교정 포인트 ({question.trapTag})
-                </div>
-                <div className="space-y-2.5 text-[16px] sm:text-[17px] leading-relaxed">
-                  {question.xrayPoints.map((xr, idx) => (
-                    <div key={idx} className="text-[#0f172a]">
-                      {xr.choiceNum && (
-                        <strong className="font-extrabold mr-2 tabular-nums">
-                          선지 {CIRCLE_NUMS[xr.choiceNum - 1]}
-                        </strong>
-                      )}
-                      <del className="err-strike">{xr.wrongSpan}</del>
-                      <span className="mx-2 text-slate-400 font-bold">→</span>
-                      <span className="key-underline">{xr.rightSpan}</span>
-                      <span className="text-sm font-semibold text-slate-500 ml-2 tabular-nums">
-                        ({xr.basis})
-                      </span>
-                    </div>
-                  ))}
-                </div>
+              <div className="space-y-2.5 text-[15.5px] sm:text-[17px] leading-relaxed">
+                {question.xrayPoints.map((xr, idx) => (
+                  <div key={idx} className="text-[#0f172a]">
+                    {xr.choiceNum && (
+                      <strong className="font-extrabold mr-2 tabular-nums">
+                        선지 {CIRCLE_NUMS[xr.choiceNum - 1]}
+                      </strong>
+                    )}
+                    <del className="err-strike">{xr.wrongSpan}</del>
+                    <span className="mx-2 text-slate-400 font-bold">→</span>
+                    <span className="key-underline">{xr.rightSpan}</span>
+                    <span className="text-sm font-semibold text-slate-500 ml-2 tabular-nums">
+                      ({xr.basis})
+                    </span>
+                  </div>
+                ))}
               </div>
-            )}
-
-            {/* 본문 해설 */}
-            <div className="space-y-2">
-              <p className="text-[16.5px] sm:text-[17.5px] text-slate-800 leading-[1.75]">
-                {question.explanation}
-              </p>
-              <p className="text-sm font-semibold text-slate-500 tabular-nums">
-                근거 : {question.referenceBasis}
-              </p>
             </div>
+          )}
 
-            {/* 절제된 하단 AI 보조 버튼 */}
-            <div className="pt-2 flex flex-wrap items-center gap-2.5">
-              <button
-                type="button"
-                onClick={onOpenExplainAI}
-                className="px-4 py-2 rounded-lg text-sm font-bold bg-[#f1f5f9] text-slate-800 hover:bg-[#0f172a] hover:text-white transition-colors"
-              >
-                내가 고른 선지 AI 비교 설명 듣기
-              </button>
-              <button
-                type="button"
-                onClick={onOpenVariantAI}
-                className="px-4 py-2 rounded-lg text-sm font-bold bg-[#eff6ff] text-[#1e3a8a] hover:bg-[#1e3a8a] hover:text-white transition-colors"
-              >
-                이 쟁점 변형문제 더 받아 풀기
-              </button>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          <div className="space-y-2">
+            <p className="text-[16px] sm:text-[17.5px] text-slate-800 leading-[1.75]">
+              {question.explanation}
+            </p>
+            <p className="text-sm font-semibold text-slate-500 tabular-nums">
+              근거 : {question.referenceBasis}
+            </p>
+          </div>
+
+          <div className="pt-2 flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              onClick={onOpenExplainAI}
+              className="px-4 py-2.5 rounded-lg text-sm font-bold bg-[#0f172a] text-white hover:bg-[#1e3a8a] transition-colors"
+            >
+              이 문제 AI에게 질문하기
+            </button>
+            <button
+              type="button"
+              onClick={onOpenVariantAI}
+              className="px-4 py-2.5 rounded-lg text-sm font-bold bg-[#eff6ff] text-[#1e3a8a] border border-[#93c5fd] hover:bg-[#1e3a8a] hover:text-white transition-colors"
+            >
+              비슷한 변형문제 더 풀기
+            </button>
+          </div>
+        </div>
+      )}
     </article>
   );
 };
 
 export const TrainerView: React.FC<TrainerViewProps> = ({
   answers,
-  bookmarkedQuestions,
   focusedQuestionId,
   isOverlayOpen,
   onClearFocusedQuestion,
   onSubmitAnswer,
   onClearSingleAnswer,
   onResetAllAnswers,
-  onToggleQuestionBookmark,
   onTriggerInstantPrompt,
 }) => {
-  const [mode, setMode] = useState<TrainerMode>('focus');
   const [filter, setFilter] = useState<FilterKey>('all');
+  const [viewMode, setViewMode] = useState<ViewMode>('single');
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [confirmReset, setConfirmReset] = useState<boolean>(false);
 
-  const [drillCards, setDrillCards] = useState<SpeedDrillCard[]>(SPEED_DRILL_CARDS);
-  const [revealedDrillIds, setRevealedDrillIds] = useState<number[]>([]);
-
   useEffect(() => {
     if (focusedQuestionId !== null) {
-      setMode('focus');
+      setViewMode('single');
       setFilter('all');
       const idx = QUESTIONS_DATA.findIndex((q) => q.id === focusedQuestionId);
       if (idx !== -1) setCurrentIndex(idx);
@@ -357,13 +307,11 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
     }
   }, [focusedQuestionId, onClearFocusedQuestion]);
 
-  const reviewSetIds = useMemo(() => {
-    const ids = new Set<number>(bookmarkedQuestions);
-    Object.entries(answers).forEach(([qId, rec]) => {
-      if (!rec.isCorrect) ids.add(Number(qId));
-    });
-    return ids;
-  }, [answers, bookmarkedQuestions]);
+  const wrongIds = useMemo(() => {
+    return Object.entries(answers)
+      .filter(([, rec]) => !rec.isCorrect)
+      .map(([id]) => Number(id));
+  }, [answers]);
 
   const filteredQuestions = useMemo(() => {
     switch (filter) {
@@ -373,12 +321,12 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
         return QUESTIONS_DATA.filter((q) => q.category === 'variant');
       case 'ox':
         return QUESTIONS_DATA.filter((q) => q.category === 'ox');
-      case 'review':
-        return QUESTIONS_DATA.filter((q) => reviewSetIds.has(q.id));
+      case 'wrong':
+        return QUESTIONS_DATA.filter((q) => wrongIds.includes(q.id));
       default:
         return QUESTIONS_DATA;
     }
-  }, [filter, reviewSetIds]);
+  }, [filter, wrongIds]);
 
   useEffect(() => {
     if (currentIndex >= filteredQuestions.length) {
@@ -388,9 +336,9 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
 
   const currentQuestion = filteredQuestions[currentIndex] ?? null;
 
-  // 집중 풀이 키보드 단축키 지원 (UI를 어지럽히지 않고 자연스럽게 동작)
+  // 키보드 단축키 (집중 풀이에서 자연스럽게 동작)
   useEffect(() => {
-    if (mode !== 'focus' || !currentQuestion || isOverlayOpen) return;
+    if (viewMode !== 'single' || !currentQuestion || isOverlayOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
@@ -431,236 +379,166 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [mode, currentQuestion, filteredQuestions.length, isOverlayOpen, onSubmitAnswer]);
+  }, [
+    viewMode,
+    currentQuestion,
+    filteredQuestions.length,
+    isOverlayOpen,
+    onSubmitAnswer,
+  ]);
 
   const totalSolved = Object.keys(answers).length;
-  const totalCorrect = Object.values(answers).filter((a) => a.isCorrect).length;
-  const accuracyPct =
-    totalSolved > 0 ? Math.round((totalCorrect / totalSolved) * 100) : 0;
 
-  const handleExplainAI = (q: QuestionItem) => {
+  const handleOpenExplainAI = (q: QuestionItem) => {
     const rec = answers[q.id];
     onTriggerInstantPrompt({
-      title: `문항 ${q.id} 맞춤 해설 프롬프트`,
+      title: `문항 ${q.id} — AI에게 비교 설명 듣기`,
       subtitle: q.sourceTitle,
-      prompt: buildQuestionExplainPrompt(q, rec?.selected),
+      placeholder:
+        '예: 내가 왜 이 선지를 골랐는지, 특히 헷갈리는 부분이 있다면 적어보세요 (선택)',
+      buildPrompt: (userNote: string) =>
+        buildQuestionExplainPrompt(q, rec?.selected, userNote),
     });
   };
 
-  const handleVariantAI = (q: QuestionItem) => {
+  const handleOpenVariantAI = (q: QuestionItem) => {
     onTriggerInstantPrompt({
-      title: `문항 ${q.id} 변형문제 출제 프롬프트`,
+      title: `문항 ${q.id} — 같은 쟁점 변형문제 더 풀기`,
       subtitle: q.sourceTitle,
-      prompt: buildQuestionVariantPrompt(q),
-    });
-  };
-
-  const toggleDrillCard = (cardId: number) => {
-    setRevealedDrillIds((prev) =>
-      prev.includes(cardId) ? prev.filter((id) => id !== cardId) : [...prev, cardId]
-    );
-  };
-
-  const shuffleDrillCards = () => {
-    setRevealedDrillIds([]);
-    setDrillCards((prev) => {
-      const copy = [...prev];
-      for (let i = copy.length - 1; i > 0; i -= 1) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
+      placeholder:
+        '예: 정족수나 주체 바꾸기 함정 위주로 O/X 문제를 더 풀고 싶어 (선택)',
+      buildPrompt: (userNote: string) =>
+        buildQuestionVariantPrompt(q, userNote),
     });
   };
 
   return (
     <div className="space-y-6">
-      {/* 간결하게 정돈된 상단 바 */}
-      <div className="bg-white rounded-xl border border-slate-200/90 p-4 sm:px-6 shadow-sm flex flex-col gap-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          {/* 좌측: 3가지 보기 방식 */}
-          <div className="inline-flex bg-[#f1f5f9] p-1 rounded-lg border border-slate-200">
-            {(
-              [
-                { id: 'focus', label: '한 문제씩 집중' },
-                { id: 'list', label: '전체 연속 보기' },
-                { id: 'drill', label: '핵심 빈칸 10선' },
-              ] as const
-            ).map((m) => {
-              const active = mode === m.id;
-              return (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => setMode(m.id)}
-                  className={`relative px-3.5 py-2 rounded-md text-sm font-bold transition-colors ${
-                    active ? 'text-white' : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  {active && (
-                    <motion.span
-                      layoutId="cleanTrainerMode"
-                      transition={{ type: 'spring', stiffness: 450, damping: 35 }}
-                      className="absolute inset-0 bg-[#0f172a] rounded-md"
-                    />
-                  )}
-                  <span className="relative z-10">{m.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* 우측: 풀이 현황 & 초기화 */}
-          <div className="flex items-center gap-4 text-sm font-bold text-slate-600 tabular-nums">
-            <span>
-              풀이 <strong className="text-[#1e3a8a]">{totalSolved}/16</strong>
-              {totalSolved > 0 && (
-                <span className="ml-2 text-slate-500">
-                  (정답률 {accuracyPct}%)
-                </span>
-              )}
-            </span>
-
-            {totalSolved > 0 && !confirmReset && (
+      {/* 간결한 단일 컨트롤 바 */}
+      <div className="bg-white rounded-xl border border-slate-200/90 p-4 sm:px-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3.5">
+        {/* 카테고리 선택 */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {(
+            [
+              { id: 'all', label: '전체 16' },
+              { id: 'exam', label: '발표 기출 3' },
+              { id: 'variant', label: '실전 변형 3' },
+              { id: 'ox', label: '핵심 O/X 10' },
+              ...(wrongIds.length > 0
+                ? [{ id: 'wrong' as const, label: `틀린 문제 ${wrongIds.length}` }]
+                : []),
+            ] as { id: FilterKey; label: string }[]
+          ).map((f) => {
+            const active = filter === f.id;
+            return (
               <button
+                key={f.id}
                 type="button"
-                onClick={() => setConfirmReset(true)}
-                className="text-xs font-bold text-slate-400 hover:text-[#b91c1c] underline"
+                onClick={() => {
+                  setFilter(f.id);
+                  setCurrentIndex(0);
+                }}
+                className={`px-3.5 py-2 rounded-lg text-sm font-bold transition-colors tabular-nums ${
+                  active
+                    ? 'bg-[#0f172a] text-white'
+                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                }`}
               >
-                기록 초기화
+                {f.label}
               </button>
-            )}
-            {confirmReset && (
-              <span className="inline-flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    onResetAllAnswers();
-                    setConfirmReset(false);
-                  }}
-                  className="px-2.5 py-1 rounded text-xs font-extrabold bg-[#b91c1c] text-white"
-                >
-                  초기화 확인
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setConfirmReset(false)}
-                  className="text-xs font-bold text-slate-500"
-                >
-                  취소
-                </button>
-              </span>
-            )}
-          </div>
+            );
+          })}
         </div>
 
-        {/* 문항 유형 필터 */}
-        {mode !== 'drill' && (
-          <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-slate-100">
-            {(
-              [
-                { id: 'all', label: '전체 16문항' },
-                { id: 'exam', label: '발표 기출 (3)' },
-                { id: 'variant', label: '실전 변형 (3)' },
-                { id: 'ox', label: '핵심 O/X (10)' },
-                { id: 'review', label: `오답·저장 (${reviewSetIds.size})` },
-              ] as const
-            ).map((f) => {
-              const active = filter === f.id;
-              return (
-                <button
-                  key={f.id}
-                  type="button"
-                  onClick={() => {
-                    setFilter(f.id);
-                    setCurrentIndex(0);
-                  }}
-                  className={`px-3.5 py-1.5 rounded-full text-sm font-bold transition-colors tabular-nums ${
-                    active
-                      ? 'bg-[#eff6ff] text-[#1e3a8a] ring-1 ring-[#1e3a8a]'
-                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
-                  }`}
-                >
-                  {f.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
+        {/* 우측: 보기 방식 전환 + 풀이 현황 */}
+        <div className="flex flex-wrap items-center justify-between md:justify-end gap-3 text-sm font-bold text-slate-600 tabular-nums border-t md:border-t-0 border-slate-100 pt-2.5 md:pt-0">
+          <button
+            type="button"
+            onClick={() =>
+              setViewMode((prev) => (prev === 'single' ? 'list' : 'single'))
+            }
+            className="text-xs sm:text-sm font-bold text-[#1e3a8a] hover:underline"
+          >
+            {viewMode === 'single' ? '전체 펼쳐보기' : '한 문제씩 보기'}
+          </button>
 
-      {/* ==================== 1. 한 문제씩 집중 풀이 ==================== */}
-      {mode === 'focus' && (
-        <>
-          {filteredQuestions.length === 0 ? (
-            <div className="bg-white rounded-xl border border-slate-200 p-12 text-center space-y-4">
-              <p className="text-lg font-extrabold text-[#0f172a]">
-                아직 오답이나 저장해 둔 문항이 없습니다.
-              </p>
+          <span className="text-slate-300">|</span>
+
+          <span>
+            풀이 <strong className="text-[#0f172a]">{totalSolved}/16</strong>
+          </span>
+
+          {totalSolved > 0 && !confirmReset && (
+            <button
+              type="button"
+              onClick={() => setConfirmReset(true)}
+              className="text-xs font-bold text-slate-400 hover:text-[#b91c1c] underline"
+            >
+              초기화
+            </button>
+          )}
+          {confirmReset && (
+            <span className="inline-flex items-center gap-1.5">
               <button
                 type="button"
-                onClick={() => setFilter('all')}
-                className="px-5 py-2.5 rounded-lg text-sm font-extrabold bg-[#0f172a] text-white"
+                onClick={() => {
+                  onResetAllAnswers();
+                  setFilter('all');
+                  setConfirmReset(false);
+                }}
+                className="px-2 py-0.5 rounded text-xs font-extrabold bg-[#b91c1c] text-white"
               >
-                전체 문항 보기
+                확인
               </button>
-            </div>
-          ) : (
-            <div className="space-y-5">
-              {currentQuestion && (
-                <QuestionSheet
-                  key={currentQuestion.id}
-                  question={currentQuestion}
-                  record={answers[currentQuestion.id]}
-                  isBookmarked={bookmarkedQuestions.includes(currentQuestion.id)}
-                  onSubmit={(sel) => onSubmitAnswer(currentQuestion.id, sel)}
-                  onRetry={() => onClearSingleAnswer(currentQuestion.id)}
-                  onToggleBookmark={() =>
-                    onToggleQuestionBookmark(currentQuestion.id)
-                  }
-                  onOpenExplainAI={() => handleExplainAI(currentQuestion)}
-                  onOpenVariantAI={() => handleVariantAI(currentQuestion)}
-                />
-              )}
+              <button
+                type="button"
+                onClick={() => setConfirmReset(false)}
+                className="text-xs text-slate-500"
+              >
+                취소
+              </button>
+            </span>
+          )}
+        </div>
+      </div>
 
-              {/* 하단 이전 / 문항 번호 / 다음 네비게이션 */}
-              <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
+      {/* 한 문제씩 보기 */}
+      {viewMode === 'single' && (
+        <div className="space-y-5">
+          {currentQuestion && (
+            <QuestionSheet
+              key={currentQuestion.id}
+              question={currentQuestion}
+              record={answers[currentQuestion.id]}
+              onSubmit={(sel) => onSubmitAnswer(currentQuestion.id, sel)}
+              onRetry={() => onClearSingleAnswer(currentQuestion.id)}
+              onOpenExplainAI={() => handleOpenExplainAI(currentQuestion)}
+              onOpenVariantAI={() => handleOpenVariantAI(currentQuestion)}
+            />
+          )}
+
+          {/* 하단 정중앙 고정 3열 그리드 페이지네이션 */}
+          <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
+            <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+              <div className="justify-self-start">
                 <button
                   type="button"
                   onClick={() =>
                     setCurrentIndex((prev) => Math.max(0, prev - 1))
                   }
                   disabled={currentIndex === 0}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold border border-slate-300 text-slate-700 hover:border-[#0f172a] disabled:opacity-35 disabled:pointer-events-none"
+                  className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2.5 rounded-lg text-sm font-bold border border-slate-300 text-slate-700 hover:border-[#0f172a] disabled:opacity-35 disabled:pointer-events-none"
                 >
                   <ArrowLeft className="w-4 h-4" />
-                  <span>이전 문제</span>
+                  <span>이전</span>
                 </button>
+              </div>
 
-                <div className="flex flex-wrap justify-center gap-1.5">
-                  {filteredQuestions.map((q, idx) => {
-                    const rec = answers[q.id];
-                    const isCurrent = idx === currentIndex;
-                    let pill = 'bg-slate-100 text-slate-600';
-                    if (rec?.isCorrect) pill = 'bg-[#eff6ff] text-[#1e3a8a]';
-                    else if (rec && !rec.isCorrect)
-                      pill = 'bg-[#fef2f2] text-[#b91c1c]';
+              <div className="justify-self-center text-sm sm:text-base font-extrabold text-[#0f172a] tabular-nums">
+                {currentIndex + 1} / {filteredQuestions.length}
+              </div>
 
-                    return (
-                      <button
-                        key={q.id}
-                        type="button"
-                        onClick={() => setCurrentIndex(idx)}
-                        className={`w-8 h-8 rounded-md text-xs font-extrabold tabular-nums transition-all ${pill} ${
-                          isCurrent ? 'ring-2 ring-[#0f172a]' : ''
-                        }`}
-                      >
-                        {q.id}
-                      </button>
-                    );
-                  })}
-                </div>
-
+              <div className="justify-self-end">
                 <button
                   type="button"
                   onClick={() =>
@@ -669,136 +547,57 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
                     )
                   }
                   disabled={currentIndex >= filteredQuestions.length - 1}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-extrabold bg-[#0f172a] text-white hover:bg-[#1e3a8a] disabled:opacity-35 disabled:pointer-events-none"
+                  className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-lg text-sm font-extrabold bg-[#0f172a] text-white hover:bg-[#1e3a8a] disabled:opacity-35 disabled:pointer-events-none"
                 >
-                  <span>다음 문제</span>
+                  <span>다음</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
-          )}
-        </>
-      )}
 
-      {/* ==================== 2. 전체 연속 보기 ==================== */}
-      {mode === 'list' && (
-        <div className="space-y-6">
-          {filteredQuestions.length === 0 ? (
-            <div className="bg-white rounded-xl border border-slate-200 p-12 text-center space-y-4">
-              <p className="text-lg font-extrabold text-[#0f172a]">
-                아직 오답이나 저장해 둔 문항이 없습니다.
-              </p>
-              <button
-                type="button"
-                onClick={() => setFilter('all')}
-                className="px-5 py-2.5 rounded-lg text-sm font-extrabold bg-[#0f172a] text-white"
-              >
-                전체 문항 보기
-              </button>
+            {/* 문항 번호 빠른 이동 (정중앙 정렬) */}
+            <div className="flex flex-wrap justify-center gap-1.5 pt-2 border-t border-slate-100">
+              {filteredQuestions.map((q, idx) => {
+                const rec = answers[q.id];
+                const isCurrent = idx === currentIndex;
+                let pill = 'bg-slate-100 text-slate-600 hover:bg-slate-200';
+                if (rec?.isCorrect) pill = 'bg-[#eff6ff] text-[#1e3a8a]';
+                else if (rec && !rec.isCorrect)
+                  pill = 'bg-[#fef2f2] text-[#b91c1c]';
+
+                return (
+                  <button
+                    key={q.id}
+                    type="button"
+                    onClick={() => setCurrentIndex(idx)}
+                    className={`w-8 h-8 rounded-md text-xs font-extrabold tabular-nums transition-all ${pill} ${
+                      isCurrent ? 'ring-2 ring-[#0f172a]' : ''
+                    }`}
+                  >
+                    {q.id}
+                  </button>
+                );
+              })}
             </div>
-          ) : (
-            filteredQuestions.map((q) => (
-              <QuestionSheet
-                key={q.id}
-                question={q}
-                record={answers[q.id]}
-                isBookmarked={bookmarkedQuestions.includes(q.id)}
-                onSubmit={(sel) => onSubmitAnswer(q.id, sel)}
-                onRetry={() => onClearSingleAnswer(q.id)}
-                onToggleBookmark={() => onToggleQuestionBookmark(q.id)}
-                onOpenExplainAI={() => handleExplainAI(q)}
-                onOpenVariantAI={() => handleVariantAI(q)}
-              />
-            ))
-          )}
+          </div>
         </div>
       )}
 
-      {/* ==================== 3. 핵심 빈칸 10선 ==================== */}
-      {mode === 'drill' && (
-        <section className="bg-white rounded-xl border border-slate-200/90 border-t-4 border-t-[#1e3a8a] p-6 sm:p-10 shadow-sm space-y-6">
-          <div className="flex flex-wrap items-end justify-between gap-4 pb-4 border-b border-slate-200">
-            <div className="space-y-1">
-              <span className="text-sm font-extrabold text-[#1e3a8a] block">
-                시험 직전 숫자 · 주체 · 정족수 점검
-              </span>
-              <h2 className="text-2xl font-extrabold text-[#0f172a]">
-                핵심 빈칸 10선 (문장을 눌러 밑줄 정답 확인)
-              </h2>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() =>
-                  setRevealedDrillIds(
-                    revealedDrillIds.length === drillCards.length
-                      ? []
-                      : drillCards.map((c) => c.id)
-                  )
-                }
-                className="px-3.5 py-2 rounded-lg text-sm font-bold border border-slate-300 text-slate-700 hover:border-[#0f172a]"
-              >
-                {revealedDrillIds.length === drillCards.length
-                  ? '모두 가리기'
-                  : '모두 펼치기'}
-              </button>
-              <button
-                type="button"
-                onClick={shuffleDrillCards}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-bold bg-[#0f172a] text-white hover:bg-[#1e3a8a]"
-              >
-                <Shuffle className="w-4 h-4" />
-                <span>섞기</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-3.5">
-            {drillCards.map((card, idx) => {
-              const isRevealed = revealedDrillIds.includes(card.id);
-              return (
-                <button
-                  key={card.id}
-                  type="button"
-                  onClick={() => toggleDrillCard(card.id)}
-                  className={`w-full text-left rounded-xl p-5 sm:px-6 border transition-all space-y-2 ${
-                    isRevealed
-                      ? 'bg-[#eff6ff]/45 border-[#93c5fd]'
-                      : 'bg-[#f8fafc] border-slate-200 hover:bg-white hover:border-[#1e3a8a]'
-                  }`}
-                >
-                  <div className="flex items-center justify-between text-xs font-extrabold text-slate-500 tabular-nums">
-                    <span className="text-[#1e3a8a]">
-                      {String(idx + 1).padStart(2, '0')} · {card.basis}
-                    </span>
-                    <span>{isRevealed ? '확인됨' : '클릭하여 정답 보기'}</span>
-                  </div>
-
-                  <p className="text-[16.5px] sm:text-[18px] font-semibold text-[#0f172a] leading-[1.68]">
-                    {card.promptBefore}
-                    {isRevealed ? (
-                      <span className="key-underline mx-1">
-                        {card.blankTarget}
-                      </span>
-                    ) : (
-                      <span className="inline-block bg-white border border-dashed border-[#1e3a8a] text-[#1e3a8a] text-sm font-extrabold px-3 py-0.5 rounded mx-1">
-                        빈칸 확인
-                      </span>
-                    )}
-                    {card.promptAfter}
-                  </p>
-
-                  {isRevealed && (
-                    <p className="text-sm font-semibold text-[#b91c1c] pt-1">
-                      주의 : {card.trapNote}
-                    </p>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </section>
+      {/* 전체 펼쳐보기 */}
+      {viewMode === 'list' && (
+        <div className="space-y-6">
+          {filteredQuestions.map((q) => (
+            <QuestionSheet
+              key={q.id}
+              question={q}
+              record={answers[q.id]}
+              onSubmit={(sel) => onSubmitAnswer(q.id, sel)}
+              onRetry={() => onClearSingleAnswer(q.id)}
+              onOpenExplainAI={() => handleOpenExplainAI(q)}
+              onOpenVariantAI={() => handleOpenVariantAI(q)}
+            />
+          ))}
+        </div>
       )}
     </div>
   );

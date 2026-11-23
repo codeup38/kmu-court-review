@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
 import {
   Check,
   ChevronDown,
@@ -9,52 +8,37 @@ import {
   X,
 } from 'lucide-react';
 import { CoachPresetId, StudyState } from '../types';
-import {
-  buildCoachPresetPrompt,
-  FALLBACK_TUTOR_TOPICS,
-} from '../utils/promptEngine';
-
-export const EXTERNAL_AI_LINKS = [
-  { label: '온국민 포털', href: 'https://portal.kookmin.ac.kr' },
-  { label: 'ChatGPT', href: 'https://chatgpt.com' },
-  { label: 'Claude', href: 'https://claude.ai' },
-  { label: 'Gemini', href: 'https://gemini.google.com' },
-];
+import { buildCoachPresetPrompt } from '../utils/promptEngine';
+import { PERSONAL_AI_LINKS, SCHOOL_AI_URL } from './InstantPromptModal';
 
 interface AICoachDrawerProps {
   isOpen: boolean;
   initialPreset: CoachPresetId;
   state: StudyState;
   wrongCount: number;
-  bookmarkCount: number;
   onClose: () => void;
   onChangeCustomMemo: (memo: string) => void;
 }
 
-const PRESET_CARDS: {
+const TEMPLATES: {
   id: CoachPresetId;
   title: string;
   desc: string;
 }[] = [
   {
     id: 'wrong-traps',
-    title: '틀린 문제 함정 패턴 집중 해부',
-    desc: '틀린 문항과 내가 고른 선지를 묶어 왜 헷갈렸는지 비교 설명 요청',
-  },
-  {
-    id: 'tutor-table',
-    title: '헷갈리는 판례·조문 1:1 과외',
-    desc: '저장한 판례·조문의 비교 기준표를 먼저 보고 차근차근 문답 진행',
+    title: '틀린 문제 · 빈출 함정 정리',
+    desc: '내가 틀린 문항(없으면 사법부 빈출 함정 Top 4)을 비교 설명받고 퀴즈 1개로 점검',
   },
   {
     id: 'variant-quiz',
-    title: '약점 쟁점 실전 변형문제 더 풀기',
-    desc: '판례 왜곡 없이 주체·정족수·반대의견 함정 문제를 1문제씩 풀이',
+    title: '실전 변형문제 1문제씩 더 풀기',
+    desc: '판례 왜곡 없이 주체·정족수·반대의견 함정 문제를 AI와 대화형으로 풀이',
   },
   {
     id: 'case-feedback',
-    title: '해외파병 사례형 답안 첨삭',
-    desc: '내 초안(또는 백지 가이드)을 바탕으로 맞힌 점과 보완 질문 받기',
+    title: '해외파병 사례형 첨삭 · 문답 연습',
+    desc: '작성한 초안 첨삭 또는 백지 상태에서 4단 답안 단계별 문답 진행',
   },
 ];
 
@@ -63,32 +47,31 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
   initialPreset,
   state,
   wrongCount,
-  bookmarkCount,
   onClose,
   onChangeCustomMemo,
 }) => {
   const [selectedPreset, setSelectedPreset] =
     useState<CoachPresetId>(initialPreset);
-  const [selectedFallbackTopics, setSelectedFallbackTopics] = useState<string[]>(
-    ['rule108', 'courtorg']
-  );
-  const [memoExpanded, setMemoExpanded] = useState<boolean>(false);
   const [copiedState, setCopiedState] = useState<boolean>(false);
+  const [previewOpen, setPreviewOpen] = useState<boolean>(false);
 
   useEffect(() => {
     setSelectedPreset(initialPreset);
+    setCopiedState(false);
   }, [initialPreset, isOpen]);
 
   const generatedPrompt = useMemo(
-    () => buildCoachPresetPrompt(selectedPreset, state, selectedFallbackTopics),
-    [selectedPreset, state, selectedFallbackTopics]
+    () => buildCoachPresetPrompt(selectedPreset, state),
+    [selectedPreset, state]
   );
+
+  if (!isOpen) return null;
 
   const copyPromptToClipboard = async (textToCopy: string) => {
     try {
       await navigator.clipboard.writeText(textToCopy);
       setCopiedState(true);
-      window.setTimeout(() => setCopiedState(false), 2200);
+      window.setTimeout(() => setCopiedState(false), 2600);
     } catch {
       const el = document.createElement('textarea');
       el.value = textToCopy;
@@ -97,261 +80,195 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
       document.execCommand('copy');
       document.body.removeChild(el);
       setCopiedState(true);
-      window.setTimeout(() => setCopiedState(false), 2200);
+      window.setTimeout(() => setCopiedState(false), 2600);
     }
   };
-
-  useEffect(() => {
-    if (isOpen) {
-      copyPromptToClipboard(generatedPrompt);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, initialPreset]);
-
-  const handleSelectPreset = (presetId: CoachPresetId) => {
-    setSelectedPreset(presetId);
-    const nextPrompt = buildCoachPresetPrompt(
-      presetId,
-      state,
-      selectedFallbackTopics
-    );
-    copyPromptToClipboard(nextPrompt);
-  };
-
-  const toggleFallbackTopic = (topicId: string) => {
-    setSelectedFallbackTopics((prev) => {
-      const exists = prev.includes(topicId);
-      if (exists && prev.length === 1) return prev;
-      return exists
-        ? prev.filter((id) => id !== topicId)
-        : [...prev, topicId];
-    });
-  };
-
-  const hasDraft = state.essayDraft.trim().length > 0;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
+    <div className="fixed inset-0 z-50 flex justify-end">
+      <div
+        onClick={onClose}
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-[1px]"
+      />
+
+      <aside
+        aria-label="AI 질문 템플릿"
+        className="relative z-10 h-full w-full max-w-lg bg-white border-l border-slate-200 flex flex-col shadow-2xl"
+      >
+        {/* 헤더 */}
+        <div className="px-6 py-5 border-b border-slate-200 flex items-start justify-between gap-4">
+          <div className="space-y-1">
+            <h2 className="text-xl font-extrabold text-[#0f172a]">
+              AI 질문 템플릿
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              직접 답변하는 챗봇이 아니라, 사법부 복습에 최적화된 질문 프롬프트를 복사해 AI에 붙여넣어 활용하는 도구입니다.
+            </p>
+          </div>
+          <button
+            type="button"
             onClick={onClose}
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-[1px] z-40"
-          />
-
-          <motion.aside
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', stiffness: 360, damping: 35 }}
-            aria-label="AI 복습 코치"
-            className="fixed top-0 right-0 h-full w-full max-w-lg bg-white border-l border-slate-200 z-50 flex flex-col shadow-2xl"
+            className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-900 shrink-0"
+            aria-label="닫기"
           >
-            {/* 헤더 */}
-            <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-extrabold text-[#0f172a]">
-                  AI 복습 코치
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                  내 풀이 기록에 맞춘 프롬프트가 자동으로 복사됩니다
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-900"
-                aria-label="닫기"
-              >
-                <X className="w-5 h-5" />
-              </button>
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* 본문 */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* 1. 템플릿 선택 */}
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-between text-sm">
+              <span className="font-extrabold text-[#0f172a]">
+                1. 필요한 질문 템플릿 선택
+              </span>
+              {wrongCount > 0 && (
+                <span className="text-xs font-extrabold text-[#b91c1c] tabular-nums">
+                  틀린 문제 {wrongCount}개 자동 반영
+                </span>
+              )}
             </div>
 
-            {/* 본문 */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {/* 학습 상태 요약 */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-lg bg-slate-50 border border-slate-200 p-3.5">
-                  <span className="text-xs font-semibold text-slate-500 block">
-                    틀린 문제
-                  </span>
-                  <span
-                    className={`text-lg font-extrabold tabular-nums ${
-                      wrongCount > 0 ? 'text-[#b91c1c]' : 'text-[#0f172a]'
-                    }`}
-                  >
-                    {wrongCount}개
-                  </span>
-                </div>
-                <div className="rounded-lg bg-slate-50 border border-slate-200 p-3.5">
-                  <span className="text-xs font-semibold text-slate-500 block">
-                    저장 항목
-                  </span>
-                  <span className="text-lg font-extrabold text-[#1e3a8a] tabular-nums">
-                    {bookmarkCount}개
-                  </span>
-                </div>
-                <div className="rounded-lg bg-slate-50 border border-slate-200 p-3.5">
-                  <span className="text-xs font-semibold text-slate-500 block">
-                    사례 초안
-                  </span>
-                  <span className="text-sm font-extrabold text-slate-700 block mt-1">
-                    {hasDraft ? '작성됨' : '미작성'}
-                  </span>
-                </div>
-              </div>
-
-              {/* 프리셋 4종 */}
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-extrabold text-[#0f172a]">
-                    복습 주제 선택
-                  </span>
-                  {copiedState && (
-                    <span className="inline-flex items-center gap-1 text-xs font-extrabold text-[#0f766e]">
-                      <Check className="w-3.5 h-3.5" />
-                      복사됨
-                    </span>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  {PRESET_CARDS.map((card) => {
-                    const active = selectedPreset === card.id;
-                    return (
-                      <button
-                        key={card.id}
-                        type="button"
-                        onClick={() => handleSelectPreset(card.id)}
-                        className={`w-full text-left rounded-xl p-4 border transition-all ${
-                          active
-                            ? 'bg-[#eff6ff] border-2 border-[#1e3a8a]'
-                            : 'bg-white border-slate-200 hover:border-slate-300'
-                        }`}
-                      >
-                        <div className="text-[15.5px] font-extrabold text-[#0f172a] mb-0.5">
-                          {card.title}
-                        </div>
-                        <p className="text-sm text-slate-600 leading-relaxed">
-                          {card.desc}
-                        </p>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {selectedPreset === 'tutor-table' && bookmarkCount === 0 && (
-                  <div className="rounded-lg bg-slate-50 border border-slate-200 p-3.5 space-y-2">
-                    <div className="text-xs font-bold text-slate-600">
-                      집중 점검할 주제를 선택하세요:
-                    </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {FALLBACK_TUTOR_TOPICS.map((t) => {
-                        const chosen = selectedFallbackTopics.includes(t.id);
-                        return (
-                          <button
-                            key={t.id}
-                            type="button"
-                            onClick={() => toggleFallbackTopic(t.id)}
-                            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
-                              chosen
-                                ? 'bg-[#1e3a8a] text-white'
-                                : 'bg-white text-slate-600 border border-slate-300'
-                            }`}
-                          >
-                            {t.label}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* 선택적 1줄 추가 메모 */}
-              <div className="rounded-lg border border-slate-200 bg-slate-50">
-                <button
-                  type="button"
-                  onClick={() => setMemoExpanded((prev) => !prev)}
-                  className="w-full px-4 py-3 flex items-center justify-between text-sm font-semibold text-slate-700"
-                >
-                  <span>특별히 더 궁금한 점 한 줄 추가 (선택)</span>
-                  {memoExpanded ? (
-                    <ChevronUp className="w-4 h-4" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4" />
-                  )}
-                </button>
-                {memoExpanded && (
-                  <div className="px-4 pb-3.5">
-                    <input
-                      type="text"
-                      value={state.coachCustomMemo}
-                      onChange={(e) => onChangeCustomMemo(e.target.value)}
-                      placeholder="예: 대법관회의와 대법원 심판 합의체의 차이를 쉽게 비교해 주세요"
-                      className="w-full px-3.5 py-2 rounded-lg text-sm bg-white border border-slate-300 text-[#0f172a] focus:outline-none focus:border-[#1e3a8a]"
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* 프롬프트 전문 미리보기 */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-extrabold text-[#0f172a]">
-                    프롬프트 미리보기
-                  </span>
+            <div className="space-y-2">
+              {TEMPLATES.map((tpl) => {
+                const active = selectedPreset === tpl.id;
+                return (
                   <button
+                    key={tpl.id}
                     type="button"
-                    onClick={() => copyPromptToClipboard(generatedPrompt)}
-                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-colors ${
-                      copiedState
-                        ? 'bg-[#0f766e] text-white'
-                        : 'bg-[#0f172a] text-white hover:bg-[#1e3a8a]'
+                    onClick={() => {
+                      setSelectedPreset(tpl.id);
+                      setCopiedState(false);
+                    }}
+                    className={`w-full text-left rounded-xl p-4 border transition-all ${
+                      active
+                        ? 'bg-[#eff6ff] border-2 border-[#1e3a8a]'
+                        : 'bg-white border-slate-200 hover:border-slate-300'
                     }`}
                   >
-                    {copiedState ? (
-                      <>
-                        <Check className="w-3.5 h-3.5" />
-                        <span>복사 완료</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>프롬프트 복사</span>
-                      </>
-                    )}
+                    <div className="text-[15.5px] font-extrabold text-[#0f172a] mb-0.5">
+                      {tpl.title}
+                    </div>
+                    <p className="text-sm text-slate-600 leading-relaxed">
+                      {tpl.desc}
+                    </p>
                   </button>
-                </div>
-
-                <pre className="w-full max-h-60 overflow-y-auto rounded-xl bg-slate-900 text-slate-100 p-4 text-[13px] leading-relaxed whitespace-pre-wrap font-sans">
-                  {generatedPrompt}
-                </pre>
-              </div>
+                );
+              })}
             </div>
+          </div>
 
-            {/* 외부 AI 바로가기 */}
-            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 grid grid-cols-2 sm:grid-cols-4 gap-2">
-              {EXTERNAL_AI_LINKS.map((item) => (
+          {/* 2. 내 질문 덧붙이기 */}
+          <div className="space-y-2">
+            <label
+              htmlFor="drawer-custom-memo"
+              className="block text-sm font-extrabold text-[#0f172a]"
+            >
+              2. 특별히 궁금한 점 덧붙이기{' '}
+              <span className="font-semibold text-slate-400">(선택)</span>
+            </label>
+            <input
+              id="drawer-custom-memo"
+              type="text"
+              value={state.coachCustomMemo}
+              onChange={(e) => {
+                onChangeCustomMemo(e.target.value);
+                setCopiedState(false);
+              }}
+              placeholder="예: 대법관회의와 대법원 심판 합의체의 차이를 쉽게 비교해 줘"
+              className="w-full px-4 py-3 rounded-xl text-sm bg-slate-50 focus:bg-white border border-slate-300 text-[#0f172a] focus:outline-none focus:border-[#1e3a8a]"
+            />
+          </div>
+
+          {/* 3. 복사 및 미리보기 */}
+          <div className="space-y-2.5">
+            <button
+              type="button"
+              onClick={() => copyPromptToClipboard(generatedPrompt)}
+              className={`w-full py-3.5 px-4 rounded-xl text-sm sm:text-base font-extrabold transition-colors flex items-center justify-center gap-2 shadow-sm ${
+                copiedState
+                  ? 'bg-[#0f766e] text-white'
+                  : 'bg-[#0f172a] text-white hover:bg-[#1e3a8a]'
+              }`}
+            >
+              {copiedState ? (
+                <>
+                  <Check className="w-4 h-4" />
+                  <span>프롬프트 복사 완료 — 아래 AI에 붙여넣기 하세요</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  <span>맞춤형 프롬프트 복사하기</span>
+                </>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setPreviewOpen((prev) => !prev)}
+              className="w-full py-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1"
+            >
+              <span>
+                {previewOpen ? '프롬프트 전문 닫기' : '복사될 프롬프트 전문 미리보기'}
+              </span>
+              {previewOpen ? (
+                <ChevronUp className="w-3.5 h-3.5" />
+              ) : (
+                <ChevronDown className="w-3.5 h-3.5" />
+              )}
+            </button>
+
+            {previewOpen && (
+              <pre className="w-full max-h-56 overflow-y-auto rounded-xl bg-slate-900 text-slate-100 p-4 text-xs leading-relaxed whitespace-pre-wrap font-sans">
+                {generatedPrompt}
+              </pre>
+            )}
+          </div>
+
+          {/* 4. 학교 무료 제공 AI 안내 및 바로가기 */}
+          <div className="rounded-xl border border-[#93c5fd] bg-[#eff6ff]/70 p-4 space-y-3">
+            <p className="text-xs sm:text-[13.5px] text-slate-700 leading-relaxed">
+              <strong>
+                무제한 모델 대신 ChatGPT 6.2 Sol, Claude Opus 5.5 등 최신 모델 사용을 권장합니다.
+              </strong>{' '}
+              학교 무료 제공 AI(FactChat)에 온국민 포털 계정으로 로그인 후 붙여넣으면 바로 이용할 수 있습니다.
+            </p>
+
+            <a
+              href={SCHOOL_AI_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => {
+                if (!copiedState) copyPromptToClipboard(generatedPrompt);
+              }}
+              className="w-full py-3 px-4 rounded-xl text-sm font-extrabold bg-[#1e3a8a] text-white hover:bg-[#0f172a] transition-colors flex items-center justify-center gap-2 shadow-sm"
+            >
+              <span>학교 무료 제공 AI 열기 (FactChat · 온국민 포털 로그인)</span>
+              <ExternalLink className="w-4 h-4 shrink-0" />
+            </a>
+
+            <div className="grid grid-cols-3 gap-2 pt-1">
+              {PERSONAL_AI_LINKS.map((item) => (
                 <a
                   key={item.label}
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-extrabold bg-white border border-slate-300 text-[#0f172a] hover:border-[#1e3a8a] hover:text-[#1e3a8a] transition-colors"
+                  onClick={() => {
+                    if (!copiedState) copyPromptToClipboard(generatedPrompt);
+                  }}
+                  className="inline-flex items-center justify-center gap-1 px-2.5 py-2 rounded-lg text-xs font-bold bg-white border border-slate-300 text-slate-700 hover:border-[#1e3a8a] hover:text-[#1e3a8a]"
                 >
                   <span>{item.label}</span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
               ))}
             </div>
-          </motion.aside>
-        </>
-      )}
-    </AnimatePresence>
+          </div>
+        </div>
+      </aside>
+    </div>
   );
 };
