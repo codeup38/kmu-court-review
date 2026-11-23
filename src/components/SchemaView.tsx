@@ -1,21 +1,17 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  AlertTriangle,
+  ArrowLeft,
   ArrowRight,
   Bookmark,
   Check,
-  GitBranch,
-  Layers,
-  Scale,
-  ShieldAlert,
-  Users,
 } from 'lucide-react';
 import {
   BOUNDARY_ITEMS,
+  CONSTITUTION_ARTICLES_SUMMARY,
   CORE_PRECEDENTS,
+  NORM_HIERARCHY_TIERS,
   OVERARCHING_QUESTION,
-  QUICK_REF_STRIP,
   QUOTA_MILESTONES,
   ROUTER_SITUATIONS,
 } from '../data/schemaData';
@@ -28,16 +24,11 @@ interface SchemaViewProps {
   onNavigateView: (view: MainViewId) => void;
 }
 
-const ORGAN_MAP_TABS: {
-  id: 'const-court' | 'sc-grand' | 'sc-petty' | 'sc-council' | 'sc-personnel';
-  label: string;
-  sub: string;
-}[] = [
-  { id: 'const-court', label: '헌법재판소', sub: '헌법재판' },
-  { id: 'sc-grand', label: '전원 2/3 이상 합의체', sub: '대법원 원칙 재판' },
-  { id: 'sc-petty', label: '3명 이상 부(소부)', sub: '대법원 예외 재판' },
-  { id: 'sc-council', label: '대법관회의', sub: '사법행정 의결' },
-  { id: 'sc-personnel', label: '법관인사위원회', sub: '인사 심의(11명)' },
+const SCHEMA_PAGES = [
+  { id: 0, num: '01', label: '삼권분립과 경계선' },
+  { id: 1, num: '02', label: '헌법 조문과 법의 서열' },
+  { id: 2, num: '03', label: '법원조직법과 대법관 정원' },
+  { id: 3, num: '04', label: '핵심 헌재 결정례 4선' },
 ];
 
 export const SchemaView: React.FC<SchemaViewProps> = ({
@@ -46,885 +37,840 @@ export const SchemaView: React.FC<SchemaViewProps> = ({
   onNavigateToQuestion,
   onNavigateView,
 }) => {
-  const [activeBoundary, setActiveBoundary] = useState<BoundaryId | null>('b1');
+  const [pageIdx, setPageIdx] = useState<number>(0);
+  const [activeBoundary, setActiveBoundary] = useState<BoundaryId | null>(null);
+  const [selectedTierId, setSelectedTierId] = useState<string>('decree-rule');
   const [activeSituationId, setActiveSituationId] = useState<string>('s2');
   const [activeQuotaIndex, setActiveQuotaIndex] = useState<number>(0);
 
-  const selectedBoundary = BOUNDARY_ITEMS.find((b) => b.id === activeBoundary) ?? null;
+  const selectedBoundary =
+    BOUNDARY_ITEMS.find((b) => b.id === activeBoundary) ?? null;
+  const selectedTier =
+    NORM_HIERARCHY_TIERS.find((t) => t.id === selectedTierId) ??
+    NORM_HIERARCHY_TIERS[2];
   const selectedSituation =
-    ROUTER_SITUATIONS.find((s) => s.id === activeSituationId) ?? ROUTER_SITUATIONS[0];
+    ROUTER_SITUATIONS.find((s) => s.id === activeSituationId) ??
+    ROUTER_SITUATIONS[1];
   const selectedQuota = QUOTA_MILESTONES[activeQuotaIndex];
 
-  const isNodeHighlighted = (node: PillarNodeId) => {
+  const isHighlighted = (node: PillarNodeId) => {
     if (!selectedBoundary) return true;
     return selectedBoundary.highlightedNodes.includes(node);
   };
 
-  const isJudiciaryAnyHighlighted =
-    isNodeHighlighted('courts') || isNodeHighlighted('constCourt');
+  const goPage = (next: number) => {
+    setPageIdx(next);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
-    <div className="space-y-10">
-      {/* ==================== MODULE 1-A : 삼권분립 3기둥 & 사법부의 역할과 한계 맵 ==================== */}
-      <section className="bg-white border border-[#cbd5e1] border-t-[3px] border-t-[#0f172a] p-6 md:p-8 shadow-sm">
-        {/* 상단 관통 질문 배너 */}
-        <div className="border-b border-[#e2e8f0] pb-5 mb-6">
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold tracking-tight text-[#1e3a8a]">
-              <Scale className="w-3.5 h-3.5" />
-              모듈 1-A · 삼권분립 3기둥과 사법부의 경계선
-            </span>
-            <span className="text-xs font-semibold text-[#64748b]">
-              아래 경계 칩을 클릭해 충돌 지점과 연결 문항을 확인하세요
-            </span>
-          </div>
-          <p className="text-lg md:text-xl font-extrabold text-[#0f172a] leading-snug">
-            {OVERARCHING_QUESTION}
-          </p>
-        </div>
-
-        {/* 경계 선택 인터랙티브 칩 바 */}
-        <div className="mb-6">
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            {BOUNDARY_ITEMS.map((item) => {
-              const isActive = activeBoundary === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() =>
-                    setActiveBoundary((prev) => (prev === item.id ? null : item.id))
-                  }
-                  className={`px-3.5 py-2 text-sm font-bold border transition-all flex items-center gap-2 ${
-                    isActive
-                      ? 'bg-[#1e3a8a] text-white border-[#1e3a8a] shadow-sm'
-                      : 'bg-[#f8fafc] text-[#334155] border-[#cbd5e1] hover:border-[#1e3a8a] hover:text-[#0f172a]'
-                  }`}
-                >
-                  <span
-                    className={`text-xs font-extrabold px-1.5 py-0.5 tabular-nums ${
-                      isActive ? 'bg-white/20 text-white' : 'bg-[#e2e8f0] text-[#0f172a]'
-                    }`}
-                  >
-                    {item.code}
-                  </span>
-                  <span>{item.title}</span>
-                </button>
-              );
-            })}
-            {activeBoundary !== null && (
+    <div className="space-y-6">
+      {/* 상단 4단계 서브 페이지 네비게이션 */}
+      <div className="bg-white rounded-xl border border-slate-200/90 p-2 shadow-sm">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-1.5">
+          {SCHEMA_PAGES.map((p) => {
+            const active = pageIdx === p.id;
+            return (
               <button
+                key={p.id}
                 type="button"
-                onClick={() => setActiveBoundary(null)}
-                className="px-3 py-2 text-xs font-bold text-[#64748b] hover:text-[#0f172a] border border-transparent hover:border-[#cbd5e1] transition-colors"
-              >
-                전체 기둥 균등 보기
-              </button>
-            )}
-          </div>
-
-          <AnimatePresence mode="wait">
-            {selectedBoundary && (
-              <motion.div
-                key={selectedBoundary.id}
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.16 }}
-                className="bg-[#eff6ff] border border-[#93c5fd] border-l-4 border-l-[#1e3a8a] p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4"
-              >
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-extrabold text-[#1e3a8a] bg-white border border-[#93c5fd] px-2 py-0.5">
-                      {selectedBoundary.code} · {selectedBoundary.title}
-                    </span>
-                    <span className="text-sm font-extrabold text-[#0f172a]">
-                      {selectedBoundary.summary}
-                    </span>
-                  </div>
-                  <p className="text-xs md:text-sm text-[#334155] leading-relaxed">
-                    {selectedBoundary.detail}
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center gap-2 shrink-0">
-                  {selectedBoundary.links.map((lnk, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => {
-                        if (lnk.questionId) {
-                          onNavigateToQuestion(lnk.questionId);
-                        } else {
-                          onNavigateView(lnk.targetView);
-                        }
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-extrabold bg-[#0f172a] text-white hover:bg-[#1e3a8a] transition-colors"
-                    >
-                      <span>{lnk.label}</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-
-        {/* 반드시 준수: 삼권분립 3기둥 레이아웃 (기둥 1 입법부 / 기둥 2 행정부 / 기둥 3 사법부 통합 컨테이너 내부에 법원 + 헌법재판소) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-          {/* 기둥 1 · 입법부 (국회) */}
-          <div
-            className={`lg:col-span-3 flex flex-col justify-between border transition-all duration-200 p-5 ${
-              selectedBoundary && isNodeHighlighted('legislative')
-                ? 'border-[#1e3a8a] border-t-[4px] bg-[#eff6ff]/40 shadow-sm'
-                : !selectedBoundary
-                ? 'border-[#cbd5e1] border-t-[3px] border-t-[#334155] bg-[#f8fafc]'
-                : 'border-[#e2e8f0] border-t-[3px] border-t-[#cbd5e1] bg-[#f8fafc] opacity-45'
-            }`}
-          >
-            <div>
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <span className="text-xs font-extrabold text-[#1e3a8a] tracking-tight tabular-nums">
-                  기둥 1 · 입법권
-                </span>
-                {selectedBoundary && isNodeHighlighted('legislative') && (
-                  <span className="text-[11px] font-extrabold bg-[#1e3a8a] text-white px-2 py-0.5">
-                    관련 기둥
-                  </span>
-                )}
-              </div>
-              <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">
-                입법부 · 국회
-              </h3>
-              <p className="text-xs font-semibold text-[#64748b] mb-4">
-                헌법 제40조 · 제60조 제1·2항
-              </p>
-
-              <div className="space-y-3 text-sm">
-                <div className="bg-white border border-[#e2e8f0] p-3">
-                  <div className="text-xs font-extrabold text-[#0f172a] mb-1">핵심 권한</div>
-                  <p className="text-[#334155] text-[13px] leading-relaxed">
-                    법률 제정 · 조약 체결·비준 동의(제60조①) · 국군 해외파견 동의(제60조②)
-                  </p>
-                </div>
-                <div className="bg-[#fef2f2]/70 border border-[#fca5a5] p-3">
-                  <div className="text-xs font-extrabold text-[#b91c1c] mb-1">
-                    넘지 못하는 선 (한계)
-                  </div>
-                  <p className="text-[#334155] text-[13px] leading-relaxed">
-                    법원의 재판 핵심 본질을 빼앗거나 기본권을 과도하게 제한할 수 없음
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 기둥 2 · 행정부 (대통령) */}
-          <div
-            className={`lg:col-span-3 flex flex-col justify-between border transition-all duration-200 p-5 ${
-              selectedBoundary && isNodeHighlighted('executive')
-                ? 'border-[#1e3a8a] border-t-[4px] bg-[#eff6ff]/40 shadow-sm'
-                : !selectedBoundary
-                ? 'border-[#cbd5e1] border-t-[3px] border-t-[#334155] bg-[#f8fafc]'
-                : 'border-[#e2e8f0] border-t-[3px] border-t-[#cbd5e1] bg-[#f8fafc] opacity-45'
-            }`}
-          >
-            <div>
-              <div className="flex items-center justify-between gap-2 mb-3">
-                <span className="text-xs font-extrabold text-[#1e3a8a] tracking-tight tabular-nums">
-                  기둥 2 · 행정권
-                </span>
-                {selectedBoundary && isNodeHighlighted('executive') && (
-                  <span className="text-[11px] font-extrabold bg-[#1e3a8a] text-white px-2 py-0.5">
-                    관련 기둥
-                  </span>
-                )}
-              </div>
-              <h3 className="text-lg font-extrabold text-[#0f172a] mb-1">
-                행정부 · 대통령
-              </h3>
-              <p className="text-xs font-semibold text-[#64748b] mb-4">
-                헌법 제66조 · 제73조 · 제74조①
-              </p>
-
-              <div className="space-y-3 text-sm">
-                <div className="bg-white border border-[#e2e8f0] p-3">
-                  <div className="text-xs font-extrabold text-[#0f172a] mb-1">핵심 권한</div>
-                  <p className="text-[#334155] text-[13px] leading-relaxed">
-                    조약 체결·비준(제73조) · 국군 통수(제74조①) 등 외교·국방의 고도의 정치적 결단
-                  </p>
-                </div>
-                <div className="bg-[#fef2f2]/70 border border-[#fca5a5] p-3">
-                  <div className="text-xs font-extrabold text-[#b91c1c] mb-1">
-                    넘지 못하는 선 (한계)
-                  </div>
-                  <p className="text-[#334155] text-[13px] leading-relaxed">
-                    반드시 헌법이 정한 절차(국회의 사전동의 등)를 지켜야 함
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 기둥 3 · 사법부 (넓은 의미의 사법권 — 하나의 통합 컨테이너 안에 법원 + 헌법재판소 함께 배치) */}
-          <div
-            className={`lg:col-span-6 flex flex-col border transition-all duration-200 p-5 ${
-              selectedBoundary && isJudiciaryAnyHighlighted
-                ? 'border-[#1e3a8a] border-t-[4px] bg-[#eff6ff]/30 shadow-sm'
-                : !selectedBoundary
-                ? 'border-[#1e3a8a] border-t-[4px] bg-[#f8fafc]'
-                : 'border-[#e2e8f0] border-t-[3px] bg-[#f8fafc] opacity-50'
-            }`}
-          >
-            {/* 기둥 3 통합 헤더 */}
-            <div className="border-b border-[#cbd5e1] pb-3 mb-4 flex flex-wrap items-baseline justify-between gap-2">
-              <div>
-                <span className="text-xs font-extrabold text-[#1e3a8a] tracking-tight tabular-nums block mb-1">
-                  기둥 3 · 사법권 (넓은 의미의 사법권)
-                </span>
-                <h3 className="text-lg font-extrabold text-[#0f172a]">
-                  사법부 통합 구조 — 구체적 사건 재판은 법원이, 헌법적 통제는 헌법재판소가 분담
-                </h3>
-              </div>
-            </div>
-
-            {/* 사법부 통합 컨테이너 내부 2분할 카드: ① 법원 / ② 헌법재판소 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
-              {/* 내부 ① 법원 */}
-              <div
-                className={`border p-4 flex flex-col justify-between transition-all ${
-                  selectedBoundary && isNodeHighlighted('courts')
-                    ? 'bg-white border-[#1e3a8a] ring-1 ring-[#1e3a8a]'
-                    : !selectedBoundary
-                    ? 'bg-white border-[#cbd5e1]'
-                    : 'bg-white/60 border-[#e2e8f0] opacity-55'
+                onClick={() => goPage(p.id)}
+                className={`relative px-4 py-3 rounded-lg text-left transition-colors flex items-center gap-2.5 ${
+                  active
+                    ? 'text-white'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="text-xs font-extrabold text-[#1e3a8a] tabular-nums">
-                      내부 ① · 헌법 제101조~제110조
-                    </span>
-                    {selectedBoundary && isNodeHighlighted('courts') && (
-                      <span className="text-[11px] font-extrabold bg-[#eff6ff] text-[#1e3a8a] border border-[#93c5fd] px-1.5 py-0.5">
-                        핵심 당사자
-                      </span>
-                    )}
-                  </div>
-                  <h4 className="text-base font-extrabold text-[#0f172a] mb-3">법원</h4>
-
-                  <div className="space-y-2.5">
-                    <div className="bg-[#f8fafc] border border-[#e2e8f0] p-2.5">
-                      <div className="text-[11px] font-extrabold text-[#0f172a] mb-1">권한</div>
-                      <p className="text-[13px] text-[#334155] leading-relaxed">
-                        외부 간섭 없이 독립하여 구체적 사건 재판 · 대법원규칙 제정
-                      </p>
-                    </div>
-                    <div className="bg-[#fef2f2]/70 border border-[#fca5a5] p-2.5">
-                      <div className="text-[11px] font-extrabold text-[#b91c1c] mb-1">
-                        넘지 못하는 선 (한계)
-                      </div>
-                      <p className="text-[13px] text-[#334155] leading-relaxed">
-                        국회가 만든 법률 테두리 안에서만 재판·규칙 제정 가능(법률을 무시할 자유가 아님)
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 내부 ② 헌법재판소 */}
-              <div
-                className={`border p-4 flex flex-col justify-between transition-all ${
-                  selectedBoundary && isNodeHighlighted('constCourt')
-                    ? 'bg-white border-[#1e3a8a] ring-1 ring-[#1e3a8a]'
-                    : !selectedBoundary
-                    ? 'bg-white border-[#cbd5e1]'
-                    : 'bg-white/60 border-[#e2e8f0] opacity-55'
-                }`}
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="text-xs font-extrabold text-[#1e3a8a] tabular-nums">
-                      내부 ② · 헌법 제111조~제113조
-                    </span>
-                    {selectedBoundary && isNodeHighlighted('constCourt') && (
-                      <span className="text-[11px] font-extrabold bg-[#eff6ff] text-[#1e3a8a] border border-[#93c5fd] px-1.5 py-0.5">
-                        핵심 당사자
-                      </span>
-                    )}
-                  </div>
-                  <h4 className="text-base font-extrabold text-[#0f172a] mb-3">헌법재판소</h4>
-
-                  <div className="space-y-2.5">
-                    <div className="bg-[#f8fafc] border border-[#e2e8f0] p-2.5">
-                      <div className="text-[11px] font-extrabold text-[#0f172a] mb-1">권한</div>
-                      <p className="text-[13px] text-[#334155] leading-relaxed">
-                        위헌법률심판 · 권한쟁의심판 등 헌법재판
-                      </p>
-                    </div>
-                    <div className="bg-[#fef2f2]/70 border border-[#fca5a5] p-2.5">
-                      <div className="text-[11px] font-extrabold text-[#b91c1c] mb-1">
-                        넘지 못하는 선 (한계)
-                      </div>
-                      <p className="text-[13px] text-[#334155] leading-relaxed">
-                        외교·국방 선택의 정치적 유불리는 판단하지 않되(사법자제), 헌법상 권한과 절차를 어겼는지는 심판함
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ==================== MODULE 1-B : 인터랙티브 라우터 + 대법관 정원 시뮬레이터 ==================== */}
-      <section className="bg-white border border-[#cbd5e1] border-t-[3px] border-t-[#1e3a8a] p-6 md:p-8 shadow-sm space-y-8">
-        <div className="border-b border-[#e2e8f0] pb-4 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-[#1e3a8a] mb-1.5">
-              <GitBranch className="w-3.5 h-3.5" />
-              모듈 1-B · 헌법 제107조 분담 & 법원조직법 3기구 라우터
-            </span>
-            <h2 className="text-xl md:text-2xl font-extrabold text-[#0f172a]">
-              이 사안은 어디서, 몇 명이 결정할까?
-            </h2>
-          </div>
-          <span className="text-xs font-semibold text-[#64748b]">
-            좌측 6가지 상황을 클릭하면 담당 기구와 정족수 경로가 전환됩니다
-          </span>
-        </div>
-
-        {/* 1. 6가지 상황 라우터 */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* 좌측 6가지 상황 선택 버튼 */}
-          <div className="lg:col-span-5 space-y-2">
-            {ROUTER_SITUATIONS.map((sit) => {
-              const isSelected = sit.id === activeSituationId;
-              return (
-                <button
-                  key={sit.id}
-                  type="button"
-                  onClick={() => setActiveSituationId(sit.id)}
-                  className={`w-full text-left p-3.5 border transition-all relative ${
-                    isSelected
-                      ? 'bg-[#eff6ff] border-[#1e3a8a] border-l-4 shadow-sm'
-                      : 'bg-[#f8fafc] border-[#cbd5e1] hover:bg-white hover:border-[#94a3b8]'
+                {active && (
+                  <motion.span
+                    layoutId="schemaSubPageIndicator"
+                    transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                    className="absolute inset-0 bg-[#0f172a] rounded-lg"
+                  />
+                )}
+                <span
+                  className={`relative z-10 text-xs font-extrabold tabular-nums ${
+                    active ? 'text-[#93c5fd]' : 'text-[#1e3a8a]'
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <span
-                      className={`text-xs font-extrabold tabular-nums ${
-                        isSelected ? 'text-[#1e3a8a]' : 'text-[#64748b]'
-                      }`}
-                    >
-                      {sit.num}
-                    </span>
-                    <span
-                      className={`text-[11px] font-bold px-2 py-0.5 border ${
-                        isSelected
-                          ? 'bg-white text-[#1e3a8a] border-[#93c5fd]'
-                          : 'bg-white text-[#475569] border-[#e2e8f0]'
-                      }`}
-                    >
-                      {sit.shortTag}
-                    </span>
-                  </div>
-                  <div className="text-sm font-bold text-[#0f172a] leading-snug">
-                    {sit.question}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                  {p.num}
+                </span>
+                <span className="relative z-10 text-sm sm:text-[15px] font-bold truncate">
+                  {p.label}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
-          {/* 우측 결과 보드 + 경로 다이어그램 */}
-          <div className="lg:col-span-7 border border-[#cbd5e1] bg-[#f8fafc] p-5 md:p-6">
-            {/* 상단 5개 기구 위치 인디케이터 */}
-            <div className="mb-5">
-              <div className="text-[11px] font-bold text-[#64748b] mb-2">
-                최종 담당 기구 위치
+      {/* 페이지별 단일 집중 시트 */}
+      <AnimatePresence mode="wait">
+        {/* ==================== PAGE 01 : 삼권분립과 경계선 (슬라이드 02 · 03 계승) ==================== */}
+        {pageIdx === 0 && (
+          <motion.section
+            key="schema-p0"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="bg-white rounded-xl border border-slate-200/90 border-t-4 border-t-[#0f172a] p-6 sm:p-10 shadow-sm space-y-8"
+          >
+            {/* 헤더 */}
+            <div className="border-b-2 border-[#0f172a] pb-4 space-y-1.5">
+              <span className="text-sm font-extrabold text-[#1e3a8a] block">
+                도입 · 삼권분립의 구조와 핵심 관점
+              </span>
+              <h2 className="text-2xl sm:text-[28px] font-extrabold text-[#0f172a] tracking-tight leading-snug">
+                삼권분립에서 각 기관이 맡은 역할과 넘지 못하는 선
+              </h2>
+            </div>
+
+            {/* 관통 질문 노트 바 */}
+            <div className="bg-[#f8fafc] border border-slate-200 border-l-4 border-l-[#1e3a8a] rounded-r-lg px-5 py-4 text-base sm:text-[17.5px] text-[#0f172a] leading-relaxed">
+              {OVERARCHING_QUESTION}
+            </div>
+
+            {/* 3가지 핵심 경계 카드 (클릭 시 밑줄·기관 하이라이트 연동) */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-slate-500">
+                  아래 세 가지 경계 중 하나를 눌러 어떤 기관끼리 맞닿는지 확인해 보세요
+                </span>
+                {activeBoundary && (
+                  <button
+                    type="button"
+                    onClick={() => setActiveBoundary(null)}
+                    className="text-sm font-bold text-[#1e3a8a] hover:underline"
+                  >
+                    전체 균등 보기
+                  </button>
+                )}
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-1.5">
-                {ORGAN_MAP_TABS.map((org) => {
-                  const active = selectedSituation.organCategory === org.id;
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {BOUNDARY_ITEMS.map((item) => {
+                  const isActive = activeBoundary === item.id;
                   return (
-                    <div
-                      key={org.id}
-                      className={`px-2.5 py-2 border text-center transition-all ${
-                        active
-                          ? 'bg-[#1e3a8a] border-[#1e3a8a] text-white shadow-sm'
-                          : 'bg-white border-[#e2e8f0] text-[#64748b]'
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() =>
+                        setActiveBoundary((prev) =>
+                          prev === item.id ? null : item.id
+                        )
+                      }
+                      className={`text-left rounded-lg p-5 border transition-all border-t-4 ${
+                        isActive
+                          ? 'bg-[#eff6ff]/70 border-[#1e3a8a] border-t-[#1e3a8a] shadow-sm'
+                          : 'bg-white border-slate-200 border-t-[#1e3a8a]/80 hover:border-slate-300'
                       }`}
                     >
-                      <div className="text-xs font-extrabold leading-tight">{org.label}</div>
-                      <div
-                        className={`text-[10px] mt-0.5 ${
-                          active ? 'text-[#bfdbfe]' : 'text-[#94a3b8]'
-                        }`}
-                      >
-                        {org.sub}
+                      <div className="text-xs sm:text-[13px] font-extrabold text-[#1e3a8a] mb-2">
+                        {item.code}
                       </div>
-                    </div>
+                      <div className="text-lg sm:text-[19px] font-extrabold text-[#0f172a] leading-snug mb-2">
+                        <span className={isActive ? 'key-underline' : ''}>
+                          {item.title}
+                        </span>
+                      </div>
+                      <p className="text-[15px] text-slate-600 leading-relaxed">
+                        {item.summary}
+                      </p>
+                    </button>
                   );
                 })}
               </div>
-            </div>
 
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={selectedSituation.id}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.18 }}
-                className="space-y-4"
-              >
-                {/* 핵심 결정 보드 */}
-                <div className="bg-white border border-[#cbd5e1] border-t-[3px] border-t-[#0f172a] p-5">
-                  <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                    <span className="text-xs font-extrabold text-[#1e3a8a] bg-[#eff6ff] border border-[#93c5fd] px-2.5 py-0.5">
-                      {selectedSituation.num} 판정 결과
-                    </span>
-                    <span className="text-xs font-bold text-[#475569] tabular-nums">
-                      근거: {selectedSituation.legalBasis}
-                    </span>
-                  </div>
-                  <h3 className="text-lg md:text-xl font-extrabold text-[#0f172a] mb-1">
-                    담당 : {selectedSituation.organTitle}
-                  </h3>
-                  <p className="text-sm font-bold text-[#1e3a8a] mb-3">
-                    {selectedSituation.organSubtitle}
+              {selectedBoundary && (
+                <motion.div
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-[#eff6ff] border border-[#93c5fd] rounded-lg px-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                >
+                  <p className="text-[15.5px] text-[#0f172a] leading-relaxed font-medium">
+                    {selectedBoundary.detail}
                   </p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-3 border-t border-[#e2e8f0] text-xs">
-                    <div className="bg-[#f8fafc] border border-[#e2e8f0] p-2.5">
-                      <span className="font-extrabold text-[#0f172a] block mb-0.5">
-                        구성 · 정족수 · 심판 원칙
-                      </span>
-                      <span className="text-[#334155] font-medium">
-                        {selectedSituation.quorumOrRule}
-                      </span>
-                    </div>
-                    <div className="bg-[#f8fafc] border border-[#e2e8f0] p-2.5">
-                      <span className="font-extrabold text-[#0f172a] block mb-0.5">
-                        {selectedSituation.proposerOrNote ? '안건 부의 주체' : '적용 조문'}
-                      </span>
-                      <span className="text-[#334155] font-medium">
-                        {selectedSituation.proposerOrNote ?? selectedSituation.legalBasis}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 3단계 시각적 처리 경로 다이어그램 */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5">
-                  {selectedSituation.flowSteps.map((step, idx) => (
-                    <div
-                      key={idx}
-                      className={`p-3 border relative ${
-                        step.accent === 'crimson'
-                          ? 'bg-[#fef2f2] border-[#fca5a5]'
-                          : step.accent === 'navy'
-                          ? 'bg-white border-[#93c5fd]'
-                          : 'bg-white border-[#cbd5e1]'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between text-[11px] font-extrabold mb-1">
-                        <span
-                          className={
-                            step.accent === 'crimson'
-                              ? 'text-[#b91c1c]'
-                              : step.accent === 'navy'
-                              ? 'text-[#1e3a8a]'
-                              : 'text-[#64748b]'
-                          }
-                        >
-                          0{idx + 1}단계 · {step.stepLabel}
-                        </span>
-                        {idx < 2 && (
-                          <ArrowRight className="w-3.5 h-3.5 text-[#94a3b8] hidden md:block" />
-                        )}
-                      </div>
-                      <div className="text-sm font-extrabold text-[#0f172a] mb-0.5">
-                        {step.actor}
-                      </div>
-                      <div className="text-xs text-[#475569] leading-relaxed">
-                        {step.detail}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* 함정 경보 및 조문 주의 노트 */}
-                <div className="bg-[#fef2f2] border border-[#fca5a5] border-l-4 border-l-[#b91c1c] p-3.5 space-y-2">
-                  <div className="flex items-start gap-2">
-                    <ShieldAlert className="w-4 h-4 text-[#b91c1c] shrink-0 mt-0.5" />
-                    <p className="text-xs md:text-sm font-semibold text-[#0f172a] leading-relaxed">
-                      <strong className="text-[#b91c1c] mr-1.5">출제 함정 포인트:</strong>
-                      {selectedSituation.keyWarning}
-                    </p>
-                  </div>
-                  {selectedSituation.examCaution && (
-                    <div className="bg-white border border-[#fca5a5] p-2.5 text-xs text-[#334155] leading-relaxed">
-                      <strong className="text-[#0f172a] font-extrabold mr-1">
-                        시험 주의 노트:
-                      </strong>
-                      {selectedSituation.examCaution}
-                    </div>
-                  )}
-                </div>
-
-                {/* 연결 문항 이동 */}
-                <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                  <span className="text-xs font-semibold text-[#64748b]">
-                    이 경계를 묻는 수록 문항:
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {selectedSituation.relatedQuestionIds.map((qId) => (
+                  <div className="flex flex-wrap gap-2 shrink-0">
+                    {selectedBoundary.links.map((lnk, idx) => (
                       <button
-                        key={qId}
+                        key={idx}
                         type="button"
-                        onClick={() => onNavigateToQuestion(qId)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-extrabold bg-white border border-[#cbd5e1] text-[#0f172a] hover:border-[#1e3a8a] hover:text-[#1e3a8a] transition-colors tabular-nums"
+                        onClick={() =>
+                          lnk.questionId
+                            ? onNavigateToQuestion(lnk.questionId)
+                            : onNavigateView(lnk.targetView)
+                        }
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-extrabold bg-[#1e3a8a] text-white hover:bg-[#0f172a] transition-colors"
                       >
-                        <span>문항 Q{qId} 풀기</span>
-                        <ArrowRight className="w-3 h-3" />
+                        <span>{lnk.label}</span>
+                        <ArrowRight className="w-4 h-4" />
                       </button>
                     ))}
                   </div>
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </div>
-
-        {/* 2. 통합 인터랙티브 위젯: 대법관 정원 변화 시뮬레이터 (법률 제21451호 부칙 반영) */}
-        <div className="border border-[#cbd5e1] bg-[#f8fafc] p-5 md:p-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 mb-5 border-b border-[#cbd5e1]">
-            <div>
-              <div className="inline-flex items-center gap-1.5 text-xs font-extrabold text-[#1e3a8a] mb-1">
-                <Users className="w-3.5 h-3.5" />
-                대법관 정원 변화 시뮬레이터 (개정 법원조직법 · 법률 제21451호 부칙 반영)
-              </div>
-              <h3 className="text-base md:text-lg font-extrabold text-[#0f172a]">
-                연도별 대법관 총원(대법원장 포함) 및 전원 2/3 이상 최소 정족수 시뮬레이션
-              </h3>
+                </motion.div>
+              )}
             </div>
 
-            {/* 연도 전환 탭 */}
-            <div className="flex flex-wrap gap-1.5 bg-white p-1 border border-[#cbd5e1]">
-              {QUOTA_MILESTONES.map((m, idx) => {
-                const active = idx === activeQuotaIndex;
-                return (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => setActiveQuotaIndex(idx)}
-                    className={`relative px-3 py-1.5 text-xs font-extrabold transition-colors tabular-nums ${
-                      active ? 'text-white' : 'text-[#475569] hover:text-[#0f172a]'
+            {/* PPT 03페이지 레이아웃 그대로: 상단 2열(입법·행정) + 하단 사법부 통합 와이드 박스 */}
+            <div className="space-y-5 pt-2">
+              {/* 상단 2열: 입법부 / 행정부 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div
+                  className={`rounded-xl border p-6 transition-all duration-200 ${
+                    selectedBoundary && isHighlighted('legislative')
+                      ? 'bg-white border-2 border-[#1e3a8a] shadow-sm'
+                      : !selectedBoundary
+                      ? 'bg-[#f8fafc] border-slate-300'
+                      : 'bg-slate-50 border-slate-200 opacity-45'
+                  }`}
+                >
+                  <div className="text-sm font-extrabold text-[#1e3a8a] mb-1.5">
+                    입법부 · 국회
+                  </div>
+                  <h3 className="text-xl font-extrabold text-[#0f172a] mb-3">
+                    법률 제정 · 조약 체결·비준 및 파병 동의(제60조①·②)
+                  </h3>
+                  <ul className="space-y-1.5 text-[16.5px] text-slate-700 leading-relaxed">
+                    <li>• 형량이나 법원 조직 등 일반 기준을 법률로 정함</li>
+                    <li>
+                      • 한계:{' '}
+                      <span className="key-underline">
+                        재판의 핵심 본질을 빼앗거나 기본권을 과도하게 제한할 수 없음
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div
+                  className={`rounded-xl border p-6 transition-all duration-200 ${
+                    selectedBoundary && isHighlighted('executive')
+                      ? 'bg-white border-2 border-[#1e3a8a] shadow-sm'
+                      : !selectedBoundary
+                      ? 'bg-[#f8fafc] border-slate-300'
+                      : 'bg-slate-50 border-slate-200 opacity-45'
+                  }`}
+                >
+                  <div className="text-sm font-extrabold text-[#1e3a8a] mb-1.5">
+                    행정부 · 대통령
+                  </div>
+                  <h3 className="text-xl font-extrabold text-[#0f172a] mb-3">
+                    조약 체결·비준(제73조) · 국군 통수(제74조①)
+                  </h3>
+                  <ul className="space-y-1.5 text-[16.5px] text-slate-700 leading-relaxed">
+                    <li>• 외교·국방에 관한 고도의 정치적 결단을 내림</li>
+                    <li>
+                      • 한계: 반드시{' '}
+                      <span className="key-underline">
+                        헌법이 정한 절차(국회의 사전동의 등)
+                      </span>
+                      를 지켜야 함
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              {/* 하단 통합 박스: 사법부 · 법원과 헌법재판소 (넓은 의미의 사법권) */}
+              <div
+                className={`rounded-xl border-2 border-[#1e3a8a] border-t-[5px] bg-[#f8fafc] p-6 sm:p-7 space-y-5 transition-opacity duration-200 ${
+                  selectedBoundary &&
+                  !isHighlighted('courts') &&
+                  !isHighlighted('constCourt')
+                    ? 'opacity-45'
+                    : 'opacity-100'
+                }`}
+              >
+                <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1 border-b border-slate-300 pb-3.5">
+                  <h3 className="text-lg sm:text-xl font-extrabold text-[#1e3a8a]">
+                    사법부 · 법원과 헌법재판소 (넓은 의미의 사법권)
+                  </h3>
+                  <span className="text-sm sm:text-[15px] font-bold text-slate-600">
+                    구체적 사건의 재판은 법원이, 헌법적 통제는 헌법재판소가 맡음
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div
+                    className={`rounded-lg bg-white border p-5 sm:p-6 transition-all ${
+                      selectedBoundary && isHighlighted('courts')
+                        ? 'border-2 border-[#1e3a8a] shadow-sm'
+                        : selectedBoundary
+                        ? 'border-slate-200 opacity-50'
+                        : 'border-slate-300'
                     }`}
                   >
-                    {active && (
-                      <motion.span
-                        layoutId="quotaYearPill"
-                        transition={{ type: 'spring', stiffness: 450, damping: 34 }}
-                        className="absolute inset-0 bg-[#1e3a8a]"
-                      />
-                    )}
-                    <span className="relative z-10">{m.periodLabel}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-            {/* 좌측 수치 요약 및 슬라이더 */}
-            <div className="lg:col-span-5 space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white border border-[#cbd5e1] p-4">
-                  <span className="text-xs font-bold text-[#64748b] block mb-1">
-                    대법관 총원 (원장 포함)
-                  </span>
-                  <div className="text-2xl md:text-3xl font-extrabold text-[#0f172a] tabular-nums">
-                    총 {selectedQuota.totalJustices}명
-                  </div>
-                  <span className="inline-block mt-1 text-xs font-bold text-[#475569] tabular-nums">
-                    {selectedQuota.addedNote}
-                  </span>
-                </div>
-
-                <div className="bg-[#eff6ff] border border-[#93c5fd] p-4">
-                  <span className="text-xs font-extrabold text-[#1e3a8a] block mb-1">
-                    전원 2/3 이상 기준
-                  </span>
-                  <div className="text-2xl md:text-3xl font-extrabold text-[#1e3a8a] tabular-nums">
-                    최소 {selectedQuota.twoThirdsMin}명
-                  </div>
-                  <span className="inline-block mt-1 text-xs font-semibold text-[#334155] tabular-nums">
-                    {selectedQuota.formulaNote}
-                  </span>
-                </div>
-              </div>
-
-              {/* 슬라이더 조작 */}
-              <div className="bg-white border border-[#e2e8f0] px-4 py-3">
-                <div className="flex items-center justify-between text-xs font-bold text-[#475569] mb-2 tabular-nums">
-                  <span>시행 시기 슬라이더 조작</span>
-                  <span className="text-[#1e3a8a] font-extrabold">
-                    {selectedQuota.periodLabel} ({selectedQuota.badge})
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={QUOTA_MILESTONES.length - 1}
-                  step={1}
-                  value={activeQuotaIndex}
-                  onChange={(e) => setActiveQuotaIndex(Number(e.target.value))}
-                  aria-label="대법관 정원 시행 연도 선택"
-                  className="w-full accent-[#1e3a8a] cursor-pointer"
-                />
-                <div className="flex justify-between text-[11px] font-semibold text-[#64748b] mt-1 tabular-nums">
-                  <span>2026 (14명)</span>
-                  <span>2028.3 (18명)</span>
-                  <span>2029.3 (22명)</span>
-                  <span>2030.3 (26명)</span>
-                </div>
-              </div>
-            </div>
-
-            {/* 우측 26개 좌석 도트 시각화 */}
-            <div className="lg:col-span-7 bg-white border border-[#cbd5e1] p-5">
-              <div className="flex flex-wrap items-center justify-between gap-2 mb-4 text-xs">
-                <span className="font-extrabold text-[#0f172a]">
-                  대법관 좌석 인디케이터 (전원 2/3 이상 정족수 점등)
-                </span>
-                <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold text-[#475569]">
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="w-3 h-3 bg-[#1e3a8a] inline-block" />
-                    2/3 정족수 ({selectedQuota.twoThirdsMin}석)
-                  </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="w-3 h-3 bg-[#cbd5e1] border border-[#94a3b8] inline-block" />
-                    나머지 재직석 ({selectedQuota.totalJustices - selectedQuota.twoThirdsMin}석)
-                  </span>
-                  {selectedQuota.totalJustices < 26 && (
-                    <span className="inline-flex items-center gap-1.5">
-                      <span className="w-3 h-3 border border-dashed border-[#cbd5e1] inline-block" />
-                      증원 예정 ({26 - selectedQuota.totalJustices}석)
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-7 sm:grid-cols-[repeat(13,minmax(0,1fr))] gap-2">
-                {Array.from({ length: 26 }, (_, i) => {
-                  const seatNum = i + 1;
-                  const isQuorumLit = seatNum <= selectedQuota.twoThirdsMin;
-                  const isActiveSeat = seatNum <= selectedQuota.totalJustices;
-
-                  return (
-                    <motion.div
-                      key={seatNum}
-                      layout
-                      initial={false}
-                      animate={{
-                        scale: isActiveSeat ? 1 : 0.94,
-                        opacity: isActiveSeat ? 1 : 0.4,
-                      }}
-                      transition={{ duration: 0.2 }}
-                      className={`h-10 flex flex-col items-center justify-center border text-xs font-extrabold tabular-nums ${
-                        isQuorumLit
-                          ? 'bg-[#1e3a8a] border-[#1e3a8a] text-white shadow-sm'
-                          : isActiveSeat
-                          ? 'bg-[#e2e8f0] border-[#94a3b8] text-[#334155]'
-                          : 'bg-transparent border-dashed border-[#cbd5e1] text-[#94a3b8]'
-                      }`}
-                      title={
-                        seatNum === 1
-                          ? '대법원장 (정원 포함)'
-                          : isQuorumLit
-                          ? `대법관 ${seatNum}석 (2/3 정족수 내)`
-                          : isActiveSeat
-                          ? `대법관 ${seatNum}석 (현 정원 내)`
-                          : `향후 증원 예정 ${seatNum}번석`
-                      }
-                    >
-                      <span>{seatNum}</span>
-                      {seatNum === 1 && (
-                        <span className="text-[9px] leading-none font-bold opacity-85">
-                          원장
+                    <div className="text-sm font-extrabold text-[#1e3a8a] mb-1.5">
+                      법원 (헌법 제101조~제110조)
+                    </div>
+                    <h4 className="text-lg sm:text-xl font-extrabold text-[#0f172a] mb-2.5">
+                      독립된 구체적 사건 재판 · 대법원규칙 제정
+                    </h4>
+                    <ul className="space-y-1.5 text-[16px] sm:text-[16.5px] text-slate-700 leading-relaxed">
+                      <li>• 외부 간섭 없이 독립하여 재판함</li>
+                      <li>
+                        • 한계:{' '}
+                        <span className="key-underline">
+                          국회가 만든 법률 테두리 안
                         </span>
-                      )}
-                    </motion.div>
+                        에서만 재판·규칙 제정 가능
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div
+                    className={`rounded-lg bg-white border p-5 sm:p-6 transition-all ${
+                      selectedBoundary && isHighlighted('constCourt')
+                        ? 'border-2 border-[#1e3a8a] shadow-sm'
+                        : selectedBoundary
+                        ? 'border-slate-200 opacity-50'
+                        : 'border-slate-300'
+                    }`}
+                  >
+                    <div className="text-sm font-extrabold text-[#1e3a8a] mb-1.5">
+                      헌법재판소 (헌법 제111조~제113조)
+                    </div>
+                    <h4 className="text-lg sm:text-xl font-extrabold text-[#0f172a] mb-2.5">
+                      위헌법률심판 · 권한쟁의심판 등 헌법재판
+                    </h4>
+                    <ul className="space-y-1.5 text-[16px] sm:text-[16.5px] text-slate-700 leading-relaxed">
+                      <li>
+                        • 외교·국방 선택의 정치적 유불리는 판단하지 않음(사법자제)
+                      </li>
+                      <li>
+                        • 역할:{' '}
+                        <span className="key-underline">
+                          헌법상 권한과 절차를 어겼는지
+                        </span>
+                        는 심판함
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.section>
+        )}
+
+        {/* ==================== PAGE 02 : 헌법 조문과 법의 서열 (슬라이드 04 · 05 계승) ==================== */}
+        {pageIdx === 1 && (
+          <motion.section
+            key="schema-p1"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="bg-white rounded-xl border border-slate-200/90 border-t-4 border-t-[#0f172a] p-6 sm:p-10 shadow-sm space-y-10"
+          >
+            <div className="border-b-2 border-[#0f172a] pb-4 space-y-1.5">
+              <span className="text-sm font-extrabold text-[#1e3a8a] block">
+                도입 · 규범의 위계와 헌법 제101조~제110조
+              </span>
+              <h2 className="text-2xl sm:text-[28px] font-extrabold text-[#0f172a] tracking-tight leading-snug">
+                법의 위아래 서열과 헌법이 정한 법원의 뼈대
+              </h2>
+            </div>
+
+            {/* 파트 A : 법의 위아래 서열과 심사 기관 (교수님 피드백 3번 반영: 명령·규칙 & 2/3 이상 합의체) */}
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h3 className="text-lg sm:text-xl font-extrabold text-[#0f172a]">
+                  1. 법의 위아래 서열과 위헌·위법 심사 기관 (제107조)
+                </h3>
+                <span className="text-sm font-semibold text-slate-500">
+                  각 단계를 클릭하면 심사 주체와 원칙이 표시됩니다
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                {/* 좌측 4단계 법단계 스텝 */}
+                <div className="lg:col-span-7 space-y-2.5">
+                  {NORM_HIERARCHY_TIERS.map((tier) => {
+                    const active = selectedTierId === tier.id;
+                    return (
+                      <button
+                        key={tier.id}
+                        type="button"
+                        onClick={() => setSelectedTierId(tier.id)}
+                        className={`w-full text-left rounded-lg p-4 sm:px-5 border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
+                          active
+                            ? 'bg-[#eff6ff] border-2 border-[#1e3a8a] shadow-sm'
+                            : 'bg-[#f8fafc] border-slate-200 hover:bg-white hover:border-slate-300'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-extrabold text-[#1e3a8a]">
+                              {tier.rankLabel}
+                            </span>
+                            <span className="text-lg font-extrabold text-[#0f172a]">
+                              {tier.name}
+                            </span>
+                          </div>
+                          <p className="text-sm text-slate-600 mt-0.5">
+                            {tier.sub}
+                          </p>
+                        </div>
+
+                        {tier.reviewOrgan && (
+                          <span
+                            className={`self-start sm:self-center shrink-0 text-xs sm:text-[13px] font-extrabold px-3 py-1.5 rounded-md ${
+                              active
+                                ? 'bg-[#1e3a8a] text-white'
+                                : 'bg-white border border-slate-300 text-[#1e3a8a]'
+                            }`}
+                          >
+                            → {tier.reviewOrgan}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* 우측 선택 단계 설명 시트 */}
+                <div className="lg:col-span-5 bg-[#f8fafc] border border-slate-300 border-t-4 border-t-[#1e3a8a] rounded-xl p-6 space-y-3">
+                  <div className="text-xs font-extrabold text-[#1e3a8a]">
+                    선택된 규범 단계 · {selectedTier.rankLabel}
+                  </div>
+                  <h4 className="text-xl font-extrabold text-[#0f172a]">
+                    {selectedTier.name}
+                  </h4>
+                  {selectedTier.reviewRule && (
+                    <div className="bg-white border border-[#93c5fd] rounded-lg px-3.5 py-2.5 text-sm font-bold text-[#1e3a8a]">
+                      {selectedTier.reviewRule}
+                    </div>
+                  )}
+                  <p className="text-[16px] text-slate-700 leading-relaxed">
+                    {selectedTier.description}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 파트 B : 헌법 제101조~제110조 핵심 표 (슬라이드 04 스타일) */}
+            <div className="space-y-4 pt-2">
+              <h3 className="text-lg sm:text-xl font-extrabold text-[#0f172a]">
+                2. 헌법 제5장(제101조~제110조) 핵심 조문 한눈에 보기
+              </h3>
+
+              <div className="divide-y divide-slate-200 border border-slate-300 rounded-xl overflow-hidden">
+                {CONSTITUTION_ARTICLES_SUMMARY.map((row) => (
+                  <div
+                    key={row.articles}
+                    className="grid grid-cols-1 md:grid-cols-12 bg-white"
+                  >
+                    <div className="md:col-span-3 bg-[#eff6ff]/60 md:border-r border-slate-200 px-5 py-4 flex flex-col justify-center">
+                      <span className="text-[16px] font-extrabold text-[#1e3a8a] tabular-nums">
+                        {row.articles}
+                      </span>
+                      <span className="text-xs font-bold text-slate-500 mt-0.5">
+                        {row.title}
+                      </span>
+                    </div>
+                    <div className="md:col-span-9 px-5 py-4 flex items-center text-[16.5px] text-[#0f172a] leading-relaxed">
+                      {row.desc}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.section>
+        )}
+
+        {/* ==================== PAGE 03 : 법원조직법 3기구 & 대법관 정원 ==================== */}
+        {pageIdx === 2 && (
+          <motion.section
+            key="schema-p2"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="bg-white rounded-xl border border-slate-200/90 border-t-4 border-t-[#0f172a] p-6 sm:p-10 shadow-sm space-y-10"
+          >
+            <div className="border-b-2 border-[#0f172a] pb-4 space-y-1.5">
+              <span className="text-sm font-extrabold text-[#1e3a8a] block">
+                법원조직법 핵심 · 3기구 역할 분담과 대법관 정원 증원
+              </span>
+              <h2 className="text-2xl sm:text-[28px] font-extrabold text-[#0f172a] tracking-tight leading-snug">
+                이 사안은 어디서, 몇 명이 결정할까?
+              </h2>
+            </div>
+
+            {/* 1. 6가지 상황 클릭형 라우터 */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              <div className="lg:col-span-5 space-y-2">
+                {ROUTER_SITUATIONS.map((sit) => {
+                  const active = sit.id === activeSituationId;
+                  return (
+                    <button
+                      key={sit.id}
+                      type="button"
+                      onClick={() => setActiveSituationId(sit.id)}
+                      className={`w-full text-left rounded-lg px-4 py-3.5 border transition-all flex items-baseline gap-3 ${
+                        active
+                          ? 'bg-[#eff6ff] border-2 border-[#1e3a8a] shadow-sm'
+                          : 'bg-[#f8fafc] border-slate-200 hover:bg-white hover:border-slate-300'
+                      }`}
+                    >
+                      <span
+                        className={`text-sm font-extrabold tabular-nums shrink-0 ${
+                          active ? 'text-[#1e3a8a]' : 'text-slate-400'
+                        }`}
+                      >
+                        {sit.num}
+                      </span>
+                      <span className="text-[15.5px] sm:text-base font-bold text-[#0f172a] leading-snug">
+                        {sit.question}
+                      </span>
+                    </button>
                   );
                 })}
               </div>
-            </div>
-          </div>
-        </div>
 
-        {/* 3. 하단 빠른 참조 스트립 (헌법 제105~110조 핵심 체크) */}
-        <div>
-          <div className="text-xs font-extrabold text-[#475569] mb-2.5 flex items-center gap-1.5">
-            <Layers className="w-3.5 h-3.5 text-[#1e3a8a]" />
-            헌법 제105조~제110조 핵심 조문 빠른 참조 스트립
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {QUICK_REF_STRIP.map((ref) => (
-              <div
-                key={ref.title}
-                className="bg-[#f8fafc] border border-[#cbd5e1] border-l-[3px] border-l-[#0f172a] p-3.5"
-              >
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <span className="text-sm font-extrabold text-[#0f172a]">{ref.title}</span>
-                  <span className="text-[11px] font-bold text-[#1e3a8a] tabular-nums">
-                    {ref.provision}
-                  </span>
-                </div>
-                <p className="text-xs text-[#334155] leading-relaxed">{ref.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ==================== MODULE 1-C : 핵심 헌재 결정례 4선 & 앞 주차 수업 연결 브릿지 ==================== */}
-      <section className="bg-white border border-[#cbd5e1] border-t-[3px] border-t-[#0f172a] p-6 md:p-8 shadow-sm">
-        <div className="border-b border-[#e2e8f0] pb-4 mb-6 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <span className="text-xs font-extrabold text-[#1e3a8a] block mb-1">
-              모듈 1-C · 사법권 관련 핵심 헌법재판소 결정례 4선 (전부 합헌)
-            </span>
-            <h2 className="text-xl md:text-2xl font-extrabold text-[#0f172a]">
-              핵심 헌재 결정례 4선 & 앞 주차 수업 연결 브릿지
-            </h2>
-          </div>
-          <span className="text-xs font-semibold text-[#64748b]">
-            [헷갈림 저장]을 누르면 우측 상단 AI 복습 코치 과외 목록에 자동 담깁니다
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-          {CORE_PRECEDENTS.map((prec) => {
-            const isBookmarked = bookmarkedCases.includes(prec.id);
-            const isTrapCard = prec.bridgeTitle.includes('함정');
-
-            return (
-              <article
-                key={prec.id}
-                className="border border-[#cbd5e1] bg-[#f8fafc] p-5 flex flex-col justify-between gap-4 hover:border-[#94a3b8] transition-colors"
-              >
-                <div className="space-y-3">
-                  {/* 카드 상단: 사건번호 + 합헌 배지 + [헷갈림 저장] 버튼 */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2 mb-1">
-                        <span className="text-sm font-extrabold text-[#1e3a8a] tabular-nums">
-                          {prec.caseNumber}
+              <div className="lg:col-span-7">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={selectedSituation.id}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.16 }}
+                    className="rounded-xl border border-slate-300 border-t-4 border-t-[#1e3a8a] bg-[#f8fafc] p-6 sm:p-8 space-y-5"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <span className="text-xs font-extrabold text-[#1e3a8a] bg-white border border-[#93c5fd] px-2.5 py-1 rounded">
+                          {selectedSituation.shortTag}
                         </span>
-                        <span className="text-xs font-extrabold bg-[#0f766e] text-white px-2 py-0.5">
-                          {prec.verdict}
+                        <span className="text-sm font-bold text-slate-600 tabular-nums">
+                          {selectedSituation.legalBasis}
                         </span>
                       </div>
-                      <h3 className="text-base md:text-lg font-extrabold text-[#0f172a]">
-                        {prec.title}
+
+                      <h3 className="text-xl sm:text-2xl font-extrabold text-[#0f172a] pt-1">
+                        {selectedSituation.organTitle}
                       </h3>
+                      <p className="text-base sm:text-[17px] font-bold text-[#1e3a8a]">
+                        {selectedSituation.organSubtitle}
+                      </p>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => onToggleCaseBookmark(prec.id)}
-                      className={`shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-extrabold border transition-colors ${
-                        isBookmarked
-                          ? 'bg-[#1e3a8a] text-white border-[#1e3a8a]'
-                          : 'bg-white text-[#475569] border-[#cbd5e1] hover:border-[#1e3a8a] hover:text-[#1e3a8a]'
-                      }`}
-                    >
-                      {isBookmarked ? (
-                        <>
-                          <Check className="w-3.5 h-3.5" />
-                          <span>저장됨</span>
-                        </>
-                      ) : (
-                        <>
-                          <Bookmark className="w-3.5 h-3.5" />
-                          <span>헷갈림 저장</span>
-                        </>
+                    <div className="bg-white rounded-lg border border-slate-200 p-4 sm:p-5 space-y-2 text-[16px]">
+                      <div>
+                        <strong className="text-[#0f172a] font-extrabold mr-2">
+                          핵심 기준:
+                        </strong>
+                        <span className="key-underline">
+                          {selectedSituation.quorumOrRule}
+                        </span>
+                      </div>
+                      {selectedSituation.proposerOrNote && (
+                        <div className="text-slate-700 font-semibold pt-1">
+                          • {selectedSituation.proposerOrNote}
+                        </div>
                       )}
-                    </button>
-                  </div>
-
-                  {/* 판례 핵심 법리 */}
-                  <p className="text-sm text-[#334155] leading-relaxed bg-white border border-[#e2e8f0] p-3.5">
-                    {prec.summary}
-                  </p>
-
-                  {/* 강도상해죄 작량감경 스케일 바 (99헌바43) */}
-                  {prec.visualScale && (
-                    <div className="bg-white border border-[#cbd5e1] px-3 py-2.5 flex flex-wrap items-center gap-2 text-xs font-bold tabular-nums">
-                      <span className="bg-[#e2e8f0] text-[#0f172a] px-2 py-1">
-                        {prec.visualScale.step1}
-                      </span>
-                      <ArrowRight className="w-3.5 h-3.5 text-[#64748b]" />
-                      <span className="bg-[#fef2f2] text-[#b91c1c] border border-[#fca5a5] px-2 py-1">
-                        {prec.visualScale.step2}
-                      </span>
-                      <span className="text-[#64748b]">&gt;</span>
-                      <span className="bg-[#eff6ff] text-[#1e3a8a] border border-[#93c5fd] px-2 py-1">
-                        {prec.visualScale.step3}
-                      </span>
                     </div>
-                  )}
-                </div>
 
-                <div className="space-y-3">
-                  {/* 앞 주차 수업 연결 브릿지 / 기출 함정 주의 */}
-                  <div
-                    className={`p-3 border-l-4 text-xs leading-relaxed ${
-                      isTrapCard
-                        ? 'bg-[#fef2f2] border border-[#fca5a5] border-l-[#b91c1c] text-[#0f172a]'
-                        : 'bg-[#eff6ff] border border-[#93c5fd] border-l-[#1e3a8a] text-[#0f172a]'
-                    }`}
-                  >
-                    <div
-                      className={`font-extrabold mb-0.5 flex items-center gap-1 ${
-                        isTrapCard ? 'text-[#b91c1c]' : 'text-[#1e3a8a]'
-                      }`}
-                    >
-                      {isTrapCard && <AlertTriangle className="w-3.5 h-3.5" />}
-                      <span>{prec.bridgeTitle}</span>
+                    <div className="border-l-4 border-l-[#b91c1c] bg-[#fef2f2] rounded-r-lg p-4 space-y-2 text-[15.5px] leading-relaxed text-[#0f172a]">
+                      <p>
+                        <strong className="text-[#b91c1c] font-extrabold mr-1.5">
+                          함정 주의:
+                        </strong>
+                        {selectedSituation.keyWarning}
+                      </p>
+                      {selectedSituation.examCaution && (
+                        <p className="text-sm text-slate-700 pt-1 border-t border-[#fca5a5]/70">
+                          <strong className="font-extrabold text-[#0f172a] mr-1">
+                            조문 원문 체크:
+                          </strong>
+                          {selectedSituation.examCaution}
+                        </p>
+                      )}
                     </div>
-                    <p className="text-[#334155] font-medium">{prec.bridgeText}</p>
-                  </div>
 
-                  {/* 연결 문항 버튼 */}
-                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                    <span className="text-[11px] font-semibold text-[#64748b]">
-                      출제 적용 문항 확인:
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {prec.relatedQuestionIds.map((qId) => (
+                    <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
+                      {selectedSituation.relatedQuestionIds.map((qId) => (
                         <button
                           key={qId}
                           type="button"
                           onClick={() => onNavigateToQuestion(qId)}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold bg-white border border-[#cbd5e1] text-[#0f172a] hover:border-[#1e3a8a] hover:text-[#1e3a8a] transition-colors tabular-nums"
+                          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-extrabold bg-white border border-slate-300 text-[#0f172a] hover:border-[#1e3a8a] hover:text-[#1e3a8a] transition-colors tabular-nums"
                         >
-                          <span>Q{qId}</span>
-                          <ArrowRight className="w-3 h-3" />
+                          <span>관련 문항 Q{qId} 확인</span>
+                          <ArrowRight className="w-4 h-4" />
                         </button>
                       ))}
                     </div>
+                  </motion.div>
+                </AnimatePresence>
+              </div>
+            </div>
+
+            {/* 2. 대법관 정원 변화 시뮬레이터 (법률 제21451호 부칙 반영 — 깔끔하게 정돈) */}
+            <div className="border-t border-slate-200 pt-8 space-y-5">
+              <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                  <span className="text-sm font-extrabold text-[#1e3a8a] block mb-1">
+                    개정 법원조직법 · 법률 제21451호 부칙 반영
+                  </span>
+                  <h3 className="text-xl font-extrabold text-[#0f172a]">
+                    대법관 정원 변화(현행 14명 → 2030년 26명)와 전원 2/3 이상 기준
+                  </h3>
+                </div>
+
+                <div className="inline-flex flex-wrap bg-[#f1f5f9] p-1 rounded-lg border border-slate-300 self-start">
+                  {QUOTA_MILESTONES.map((m, idx) => {
+                    const active = idx === activeQuotaIndex;
+                    return (
+                      <button
+                        key={m.id}
+                        type="button"
+                        onClick={() => setActiveQuotaIndex(idx)}
+                        className={`relative px-3.5 py-2 rounded-md text-sm font-extrabold transition-colors tabular-nums ${
+                          active ? 'text-white' : 'text-slate-600 hover:text-slate-900'
+                        }`}
+                      >
+                        {active && (
+                          <motion.span
+                            layoutId="cleanQuotaTab"
+                            transition={{ type: 'spring', stiffness: 450, damping: 34 }}
+                            className="absolute inset-0 bg-[#1e3a8a] rounded-md"
+                          />
+                        )}
+                        <span className="relative z-10">{m.periodLabel}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="bg-[#f8fafc] rounded-xl border border-slate-200 p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <div className="lg:col-span-5 grid grid-cols-2 gap-4">
+                  <div className="bg-white rounded-lg border border-slate-200 p-4">
+                    <span className="text-xs font-bold text-slate-500 block mb-1">
+                      대법관 총원 (대법원장 포함)
+                    </span>
+                    <div className="text-2xl sm:text-3xl font-extrabold text-[#0f172a] tabular-nums">
+                      총 {selectedQuota.totalJustices}명
+                    </div>
+                    <span className="text-xs font-semibold text-slate-500 mt-1 block">
+                      {selectedQuota.addedNote}
+                    </span>
+                  </div>
+
+                  <div className="bg-[#eff6ff] rounded-lg border border-[#93c5fd] p-4">
+                    <span className="text-xs font-extrabold text-[#1e3a8a] block mb-1">
+                      전원 2/3 이상 최소 인원
+                    </span>
+                    <div className="text-2xl sm:text-3xl font-extrabold text-[#1e3a8a] tabular-nums">
+                      최소 {selectedQuota.twoThirdsMin}명
+                    </div>
+                    <span className="text-xs font-semibold text-slate-600 mt-1 block tabular-nums">
+                      {selectedQuota.formulaNote}
+                    </span>
                   </div>
                 </div>
-              </article>
-            );
-          })}
-        </div>
-      </section>
+
+                <div className="lg:col-span-7 space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-slate-600">
+                    <span>좌석 점등 인디케이터 (총 26석 기준)</span>
+                    <div className="flex items-center gap-4">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="w-3 h-3 rounded-sm bg-[#1e3a8a] inline-block" />
+                        2/3 정족수 ({selectedQuota.twoThirdsMin}명)
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="w-3 h-3 rounded-sm bg-slate-300 inline-block" />
+                        재직 정원
+                      </span>
+                      {selectedQuota.totalJustices < 26 && (
+                        <span className="inline-flex items-center gap-1.5">
+                          <span className="w-3 h-3 rounded-sm border border-dashed border-slate-300 inline-block" />
+                          증원 예정
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-7 sm:grid-cols-[repeat(13,minmax(0,1fr))] gap-2">
+                    {Array.from({ length: 26 }, (_, i) => {
+                      const seat = i + 1;
+                      const isLit = seat <= selectedQuota.twoThirdsMin;
+                      const isCurrent = seat <= selectedQuota.totalJustices;
+                      return (
+                        <div
+                          key={seat}
+                          className={`h-9 rounded-md flex items-center justify-center text-xs font-extrabold tabular-nums transition-all ${
+                            isLit
+                              ? 'bg-[#1e3a8a] text-white shadow-sm'
+                              : isCurrent
+                              ? 'bg-slate-200 text-slate-700'
+                              : 'border border-dashed border-slate-300 text-slate-300'
+                          }`}
+                        >
+                          {seat}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.section>
+        )}
+
+        {/* ==================== PAGE 04 : 핵심 헌재 결정례 4선 ==================== */}
+        {pageIdx === 3 && (
+          <motion.section
+            key="schema-p3"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="bg-white rounded-xl border border-slate-200/90 border-t-4 border-t-[#0f172a] p-6 sm:p-10 shadow-sm space-y-8"
+          >
+            <div className="border-b-2 border-[#0f172a] pb-4 flex flex-wrap items-end justify-between gap-3">
+              <div className="space-y-1.5">
+                <span className="text-sm font-extrabold text-[#1e3a8a] block">
+                  사법권의 독립과 한계 · 결론은 네 사건 모두 ‘합헌’
+                </span>
+                <h2 className="text-2xl sm:text-[28px] font-extrabold text-[#0f172a] tracking-tight leading-snug">
+                  핵심 헌법재판소 결정례 4선 & 수업 연결 포인트
+                </h2>
+              </div>
+              <span className="text-sm font-semibold text-slate-500">
+                [헷갈림 저장] 시 AI 복습 코치 과외 목록에 추가됩니다
+              </span>
+            </div>
+
+            <div className="space-y-5">
+              {CORE_PRECEDENTS.map((prec) => {
+                const isBookmarked = bookmarkedCases.includes(prec.id);
+                const isTrap = prec.bridgeTitle.includes('함정');
+
+                return (
+                  <article
+                    key={prec.id}
+                    className="rounded-xl border border-slate-300 bg-[#f8fafc] p-6 sm:p-7 space-y-4"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-sm font-extrabold bg-[#1e3a8a] text-white px-3 py-0.5 rounded tabular-nums">
+                            {prec.verdict}
+                          </span>
+                          <span className="text-base font-extrabold text-[#1e3a8a] tabular-nums">
+                            {prec.caseNumber}
+                          </span>
+                        </div>
+                        <h3 className="text-xl font-extrabold text-[#0f172a] pt-0.5">
+                          {prec.title}
+                        </h3>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => onToggleCaseBookmark(prec.id)}
+                        className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold border transition-colors ${
+                          isBookmarked
+                            ? 'bg-[#1e3a8a] text-white border-[#1e3a8a]'
+                            : 'bg-white text-slate-600 border-slate-300 hover:border-[#1e3a8a] hover:text-[#1e3a8a]'
+                        }`}
+                      >
+                        {isBookmarked ? (
+                          <>
+                            <Check className="w-4 h-4" />
+                            <span>저장됨</span>
+                          </>
+                        ) : (
+                          <>
+                            <Bookmark className="w-4 h-4" />
+                            <span>헷갈림 저장</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <p className="text-[16.5px] sm:text-[17.5px] text-slate-800 leading-[1.7] bg-white rounded-lg border border-slate-200 p-5">
+                      {prec.summary}
+                    </p>
+
+                    {prec.visualScale && (
+                      <div className="bg-white rounded-lg border border-slate-200 px-4 py-3 flex flex-wrap items-center gap-2.5 text-sm sm:text-[15px] font-bold tabular-nums">
+                        <span className="bg-slate-100 text-slate-900 px-3 py-1 rounded">
+                          {prec.visualScale.step1}
+                        </span>
+                        <span className="text-slate-400">→</span>
+                        <span className="bg-[#fef2f2] text-[#b91c1c] border border-[#fca5a5] px-3 py-1 rounded">
+                          {prec.visualScale.step2}
+                        </span>
+                        <span className="text-slate-400">&gt;</span>
+                        <span className="bg-[#eff6ff] text-[#1e3a8a] border border-[#93c5fd] px-3 py-1 rounded">
+                          {prec.visualScale.step3}
+                        </span>
+                      </div>
+                    )}
+
+                    <div
+                      className={`rounded-r-lg border-l-4 px-5 py-3.5 text-[15.5px] leading-relaxed ${
+                        isTrap
+                          ? 'bg-[#fef2f2] border border-[#fca5a5] border-l-[#b91c1c] text-slate-900'
+                          : 'bg-[#eff6ff] border border-[#93c5fd] border-l-[#1e3a8a] text-slate-900'
+                      }`}
+                    >
+                      <strong
+                        className={`font-extrabold mr-2 ${
+                          isTrap ? 'text-[#b91c1c]' : 'text-[#1e3a8a]'
+                        }`}
+                      >
+                        {prec.bridgeTitle}:
+                      </strong>
+                      {prec.bridgeText}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </motion.section>
+        )}
+      </AnimatePresence>
+
+      {/* 하단 이전 / 다음 페이지 이동 바 */}
+      <div className="flex items-center justify-between pt-1">
+        <button
+          type="button"
+          onClick={() => goPage(Math.max(0, pageIdx - 1))}
+          disabled={pageIdx === 0}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-bold bg-white border border-slate-300 text-slate-700 hover:border-[#0f172a] hover:text-[#0f172a] disabled:opacity-35 disabled:pointer-events-none transition-colors shadow-sm"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>이전 주제</span>
+        </button>
+
+        <span className="text-sm font-extrabold text-slate-500 tabular-nums">
+          {pageIdx + 1} / {SCHEMA_PAGES.length}
+        </span>
+
+        {pageIdx < SCHEMA_PAGES.length - 1 ? (
+          <button
+            type="button"
+            onClick={() => goPage(pageIdx + 1)}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-extrabold bg-[#0f172a] text-white hover:bg-[#1e3a8a] transition-colors shadow-sm"
+          >
+            <span>다음: {SCHEMA_PAGES[pageIdx + 1].label}</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => onNavigateView('trainer')}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-extrabold bg-[#1e3a8a] text-white hover:bg-[#0f172a] transition-colors shadow-sm"
+          >
+            <span>문제 훈련으로 넘어가기</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+        )}
+      </div>
     </div>
   );
 };

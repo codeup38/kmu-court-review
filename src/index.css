@@ -3,13 +3,18 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+  }
+
   html,
   body {
     font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
     letter-spacing: -0.02em;
     word-break: keep-all;
     overflow-wrap: break-word;
-    background-color: #f8fafc;
+    background-color: #f1f5f9;
     color: #0f172a;
     -webkit-font-smoothing: antialiased;
   }
@@ -19,27 +24,39 @@
   }
 }
 
-/* Subtle architectural editorial grid background */
-.bg-editorial-grid {
-  background-color: #f8fafc;
-  background-image:
-    linear-gradient(to right, rgba(203, 213, 225, 0.35) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(203, 213, 225, 0.35) 1px, transparent 1px);
-  background-size: 32px 32px;
+@layer components {
+  /* PPT 13번 슬라이드 핵심 밑줄 & 취소선 스타일 계승 */
+  .key-underline {
+    color: #1e3a8a;
+    font-weight: 800;
+    border-bottom: 2.5px solid #93c5fd;
+    padding-bottom: 1px;
+  }
+
+  .err-strike {
+    color: #b91c1c;
+    text-decoration: line-through;
+    text-decoration-thickness: 2.5px;
+    text-decoration-color: #b91c1c;
+    background-color: #fee2e2;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
 }
 
-/* Custom crisp scrollbar */
+/* 깔끔한 스크롤바 */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
   background: #cbd5e1;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {

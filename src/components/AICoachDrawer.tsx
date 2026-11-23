@@ -1,15 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  BookOpenCheck,
   Check,
   ChevronDown,
   ChevronUp,
   Copy,
   ExternalLink,
-  FileCheck2,
-  ListTodo,
-  ScanSearch,
   X,
 } from 'lucide-react';
 import { CoachPresetId, StudyState } from '../types';
@@ -37,38 +33,28 @@ interface AICoachDrawerProps {
 
 const PRESET_CARDS: {
   id: CoachPresetId;
-  code: string;
   title: string;
   desc: string;
-  icon: React.ComponentType<{ className?: string }>;
 }[] = [
   {
     id: 'wrong-traps',
-    code: '프리셋 01',
     title: '틀린 문제 함정 패턴 집중 해부',
-    desc: '내가 틀린 문항·선택 선지·정답 법리를 묶어 비교 설명 + 확인 퀴즈 1개 요청',
-    icon: ScanSearch,
+    desc: '틀린 문항과 내가 고른 선지를 묶어 왜 헷갈렸는지 비교 설명 요청',
   },
   {
     id: 'tutor-table',
-    code: '프리셋 02',
-    title: '헷갈리는 판례·조문 1:1 과외 모드',
-    desc: '북마크 판례·조문 기준표를 먼저 제시받은 뒤 단계별 문답으로 점검',
-    icon: BookOpenCheck,
+    title: '헷갈리는 판례·조문 1:1 과외',
+    desc: '저장한 판례·조문의 비교 기준표를 먼저 보고 차근차근 문답 진행',
   },
   {
     id: 'variant-quiz',
-    code: '프리셋 03',
-    title: '약점 쟁점 실전 변형문제 추가 출제',
-    desc: '판례 왜곡 없이 주체·정족수·원칙예외·반대의견 함정 7급 문제를 1문제씩 풀이',
-    icon: ListTodo,
+    title: '약점 쟁점 실전 변형문제 더 풀기',
+    desc: '판례 왜곡 없이 주체·정족수·반대의견 함정 문제를 1문제씩 풀이',
   },
   {
     id: 'case-feedback',
-    code: '프리셋 04',
-    title: '해외파병 사례형 답안 첨삭 & 후속 질문',
-    desc: '내 초안(또는 백지 가이드) 기반 맞힌 점 → 빠진 경계 → 보완 역질문 피드백',
-    icon: FileCheck2,
+    title: '해외파병 사례형 답안 첨삭',
+    desc: '내 초안(또는 백지 가이드)을 바탕으로 맞힌 점과 보완 질문 받기',
   },
 ];
 
@@ -81,11 +67,11 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
   onClose,
   onChangeCustomMemo,
 }) => {
-  const [selectedPreset, setSelectedPreset] = useState<CoachPresetId>(initialPreset);
-  const [selectedFallbackTopics, setSelectedFallbackTopics] = useState<string[]>([
-    'rule108',
-    'courtorg',
-  ]);
+  const [selectedPreset, setSelectedPreset] =
+    useState<CoachPresetId>(initialPreset);
+  const [selectedFallbackTopics, setSelectedFallbackTopics] = useState<string[]>(
+    ['rule108', 'courtorg']
+  );
   const [memoExpanded, setMemoExpanded] = useState<boolean>(false);
   const [copiedState, setCopiedState] = useState<boolean>(false);
 
@@ -104,7 +90,6 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
       setCopiedState(true);
       window.setTimeout(() => setCopiedState(false), 2200);
     } catch {
-      // Fallback textarea copy
       const el = document.createElement('textarea');
       el.value = textToCopy;
       document.body.appendChild(el);
@@ -116,7 +101,6 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
     }
   };
 
-  // 드로어가 열릴 때 현재 프리셋 프롬프트 자동 복사 편의 제공
   useEffect(() => {
     if (isOpen) {
       copyPromptToClipboard(generatedPrompt);
@@ -138,7 +122,9 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
     setSelectedFallbackTopics((prev) => {
       const exists = prev.includes(topicId);
       if (exists && prev.length === 1) return prev;
-      return exists ? prev.filter((id) => id !== topicId) : [...prev, topicId];
+      return exists
+        ? prev.filter((id) => id !== topicId)
+        : [...prev, topicId];
     });
   };
 
@@ -148,51 +134,49 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* 백드롭 */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.18 }}
             onClick={onClose}
-            className="fixed inset-0 bg-[#0f172a]/45 z-40"
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-[1px] z-40"
           />
 
-          {/* 우측 슬라이드오버 드로어 */}
           <motion.aside
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'spring', stiffness: 380, damping: 36 }}
+            transition={{ type: 'spring', stiffness: 360, damping: 35 }}
             aria-label="AI 복습 코치"
-            className="fixed top-0 right-0 h-full w-full max-w-xl bg-white border-l-2 border-[#0f172a] z-50 flex flex-col shadow-2xl"
+            className="fixed top-0 right-0 h-full w-full max-w-lg bg-white border-l border-slate-200 z-50 flex flex-col shadow-2xl"
           >
-            {/* 드로어 상단 헤더 */}
-            <div className="px-6 py-4 border-b-2 border-[#0f172a] bg-[#f8fafc] flex items-center justify-between">
+            {/* 헤더 */}
+            <div className="px-6 py-5 border-b border-slate-200 flex items-center justify-between">
               <div>
-                <span className="text-[11px] font-extrabold text-[#1e3a8a] block">
-                  컨텍스트 기반 맞춤 프롬프트 엔진
-                </span>
-                <h2 className="text-lg font-extrabold text-[#0f172a]">
+                <h2 className="text-xl font-extrabold text-[#0f172a]">
                   AI 복습 코치
                 </h2>
+                <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+                  내 풀이 기록에 맞춘 프롬프트가 자동으로 복사됩니다
+                </p>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="p-2 border border-[#cbd5e1] bg-white text-[#475569] hover:text-[#0f172a] hover:border-[#0f172a]"
+                className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-900"
                 aria-label="닫기"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* 스크롤 본문 */}
+            {/* 본문 */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {/* 1. 자동 수집된 내 학습 상태 요약 */}
-              <div className="grid grid-cols-3 gap-2.5">
-                <div className="border border-[#cbd5e1] bg-[#f8fafc] p-3">
-                  <span className="text-[11px] font-bold text-[#64748b] block">
+              {/* 학습 상태 요약 */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-lg bg-slate-50 border border-slate-200 p-3.5">
+                  <span className="text-xs font-semibold text-slate-500 block">
                     틀린 문제
                   </span>
                   <span
@@ -203,85 +187,67 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
                     {wrongCount}개
                   </span>
                 </div>
-                <div className="border border-[#cbd5e1] bg-[#f8fafc] p-3">
-                  <span className="text-[11px] font-bold text-[#64748b] block">
-                    헷갈림 북마크
+                <div className="rounded-lg bg-slate-50 border border-slate-200 p-3.5">
+                  <span className="text-xs font-semibold text-slate-500 block">
+                    저장 항목
                   </span>
                   <span className="text-lg font-extrabold text-[#1e3a8a] tabular-nums">
                     {bookmarkCount}개
                   </span>
                 </div>
-                <div className="border border-[#cbd5e1] bg-[#f8fafc] p-3">
-                  <span className="text-[11px] font-bold text-[#64748b] block">
-                    사례형 초안
+                <div className="rounded-lg bg-slate-50 border border-slate-200 p-3.5">
+                  <span className="text-xs font-semibold text-slate-500 block">
+                    사례 초안
                   </span>
-                  <span
-                    className={`text-sm font-extrabold block mt-1 ${
-                      hasDraft ? 'text-[#0f766e]' : 'text-[#64748b]'
-                    }`}
-                  >
-                    {hasDraft ? '작성됨' : '미작성 (가이드)'}
+                  <span className="text-sm font-extrabold text-slate-700 block mt-1">
+                    {hasDraft ? '작성됨' : '미작성'}
                   </span>
                 </div>
               </div>
 
-              {/* 2. 원클릭 스마트 프리셋 4종 */}
+              {/* 프리셋 4종 */}
               <div className="space-y-2.5">
-                <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center justify-between text-sm">
                   <span className="font-extrabold text-[#0f172a]">
-                    원클릭 스마트 프리셋 선택 (클릭 즉시 맞춤 생성·복사)
+                    복습 주제 선택
                   </span>
                   {copiedState && (
-                    <span className="inline-flex items-center gap-1 font-extrabold text-[#0f766e]">
+                    <span className="inline-flex items-center gap-1 text-xs font-extrabold text-[#0f766e]">
                       <Check className="w-3.5 h-3.5" />
-                      클립보드 복사됨
+                      복사됨
                     </span>
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 gap-2">
+                <div className="space-y-2">
                   {PRESET_CARDS.map((card) => {
-                    const Icon = card.icon;
                     const active = selectedPreset === card.id;
                     return (
                       <button
                         key={card.id}
                         type="button"
                         onClick={() => handleSelectPreset(card.id)}
-                        className={`w-full text-left p-3.5 border transition-all flex items-start gap-3 ${
+                        className={`w-full text-left rounded-xl p-4 border transition-all ${
                           active
-                            ? 'bg-[#eff6ff] border-[#1e3a8a] border-l-4 shadow-sm'
-                            : 'bg-white border-[#cbd5e1] hover:border-[#94a3b8]'
+                            ? 'bg-[#eff6ff] border-2 border-[#1e3a8a]'
+                            : 'bg-white border-slate-200 hover:border-slate-300'
                         }`}
                       >
-                        <Icon
-                          className={`w-4 h-4 shrink-0 mt-0.5 ${
-                            active ? 'text-[#1e3a8a]' : 'text-[#64748b]'
-                          }`}
-                        />
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[11px] font-extrabold text-[#1e3a8a] tabular-nums">
-                              {card.code}
-                            </span>
-                            <span className="text-sm font-extrabold text-[#0f172a]">
-                              {card.title}
-                            </span>
-                          </div>
-                          <p className="text-xs text-[#475569] leading-relaxed">
-                            {card.desc}
-                          </p>
+                        <div className="text-[15.5px] font-extrabold text-[#0f172a] mb-0.5">
+                          {card.title}
                         </div>
+                        <p className="text-sm text-slate-600 leading-relaxed">
+                          {card.desc}
+                        </p>
                       </button>
                     );
                   })}
                 </div>
 
-                {/* 프리셋 2 선택 시 북마크가 0개면 핵심 쟁점 선택 칩 노출 */}
                 {selectedPreset === 'tutor-table' && bookmarkCount === 0 && (
-                  <div className="bg-[#f8fafc] border border-[#cbd5e1] p-3 space-y-2">
-                    <div className="text-xs font-extrabold text-[#334155]">
-                      북마크한 항목이 없어 아래 선택된 핵심 쟁점으로 과외표를 구성합니다:
+                  <div className="rounded-lg bg-slate-50 border border-slate-200 p-3.5 space-y-2">
+                    <div className="text-xs font-bold text-slate-600">
+                      집중 점검할 주제를 선택하세요:
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {FALLBACK_TUTOR_TOPICS.map((t) => {
@@ -291,10 +257,10 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
                             key={t.id}
                             type="button"
                             onClick={() => toggleFallbackTopic(t.id)}
-                            className={`px-2.5 py-1 text-xs font-bold border transition-colors ${
+                            className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
                               chosen
-                                ? 'bg-[#1e3a8a] text-white border-[#1e3a8a]'
-                                : 'bg-white text-[#475569] border-[#cbd5e1]'
+                                ? 'bg-[#1e3a8a] text-white'
+                                : 'bg-white text-slate-600 border border-slate-300'
                             }`}
                           >
                             {t.label}
@@ -306,14 +272,14 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
                 )}
               </div>
 
-              {/* 3. 선택적 접이식 1줄 메모 */}
-              <div className="border border-[#cbd5e1] bg-[#f8fafc]">
+              {/* 선택적 1줄 추가 메모 */}
+              <div className="rounded-lg border border-slate-200 bg-slate-50">
                 <button
                   type="button"
                   onClick={() => setMemoExpanded((prev) => !prev)}
-                  className="w-full px-3.5 py-2.5 flex items-center justify-between text-xs font-bold text-[#334155] hover:text-[#0f172a]"
+                  className="w-full px-4 py-3 flex items-center justify-between text-sm font-semibold text-slate-700"
                 >
-                  <span>특별히 더 궁금한 점이 있다면 한 줄 추가 (선택)</span>
+                  <span>특별히 더 궁금한 점 한 줄 추가 (선택)</span>
                   {memoExpanded ? (
                     <ChevronUp className="w-4 h-4" />
                   ) : (
@@ -321,28 +287,28 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
                   )}
                 </button>
                 {memoExpanded && (
-                  <div className="px-3.5 pb-3.5">
+                  <div className="px-4 pb-3.5">
                     <input
                       type="text"
                       value={state.coachCustomMemo}
                       onChange={(e) => onChangeCustomMemo(e.target.value)}
-                      placeholder="예: 대법관회의와 전원합의체의 차이를 비유로 설명해 주세요"
-                      className="w-full px-3 py-2 text-xs bg-white border border-[#cbd5e1] text-[#0f172a] focus:outline-none focus:border-[#1e3a8a]"
+                      placeholder="예: 대법관회의와 대법원 심판 합의체의 차이를 쉽게 비교해 주세요"
+                      className="w-full px-3.5 py-2 rounded-lg text-sm bg-white border border-slate-300 text-[#0f172a] focus:outline-none focus:border-[#1e3a8a]"
                     />
                   </div>
                 )}
               </div>
 
-              {/* 4. 생성된 프롬프트 전문 뷰어 */}
+              {/* 프롬프트 전문 미리보기 */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-extrabold text-[#0f172a]">
-                    생성된 맞춤 프롬프트 프리뷰
+                  <span className="text-sm font-extrabold text-[#0f172a]">
+                    프롬프트 미리보기
                   </span>
                   <button
                     type="button"
                     onClick={() => copyPromptToClipboard(generatedPrompt)}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-extrabold transition-colors ${
+                    className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-colors ${
                       copiedState
                         ? 'bg-[#0f766e] text-white'
                         : 'bg-[#0f172a] text-white hover:bg-[#1e3a8a]'
@@ -362,28 +328,26 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
                   </button>
                 </div>
 
-                <pre className="w-full max-h-64 overflow-y-auto bg-[#0f172a] text-[#e2e8f0] p-4 text-xs leading-relaxed whitespace-pre-wrap font-sans border border-[#334155]">
+                <pre className="w-full max-h-60 overflow-y-auto rounded-xl bg-slate-900 text-slate-100 p-4 text-[13px] leading-relaxed whitespace-pre-wrap font-sans">
                   {generatedPrompt}
                 </pre>
               </div>
             </div>
 
-            {/* 드로어 하단 고정: 외부 채팅창 빠른 실행 링크 버튼 */}
-            <div className="px-6 py-4 border-t border-[#cbd5e1] bg-[#f8fafc]">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {EXTERNAL_AI_LINKS.map((item) => (
-                  <a
-                    key={item.label}
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-extrabold bg-white border border-[#cbd5e1] text-[#0f172a] hover:border-[#1e3a8a] hover:text-[#1e3a8a] transition-colors"
-                  >
-                    <span>{item.label}</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
-                ))}
-              </div>
+            {/* 외부 AI 바로가기 */}
+            <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {EXTERNAL_AI_LINKS.map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg text-xs font-extrabold bg-white border border-slate-300 text-[#0f172a] hover:border-[#1e3a8a] hover:text-[#1e3a8a] transition-colors"
+                >
+                  <span>{item.label}</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              ))}
             </div>
           </motion.aside>
         </>
