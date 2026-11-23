@@ -36,6 +36,15 @@ export const InstantPromptModal: React.FC<InstantPromptModalProps> = ({
     setPreviewOpen(false);
   }, [data]);
 
+  useEffect(() => {
+    if (!data) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [data, onClose]);
+
   const promptText = useMemo(() => {
     if (!data) return '';
     return data.buildPrompt(userNote);

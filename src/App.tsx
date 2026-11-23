@@ -62,7 +62,7 @@ export const App: React.FC = () => {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="min-h-[68px] py-2.5 flex items-center justify-between md:grid md:grid-cols-[1fr_auto_1fr] gap-3">
             {/* 좌측 타이틀 */}
-            <div className="justify-self-start">
+            <div className="justify-self-start min-w-0">
               <button
                 type="button"
                 onClick={() => handleNavigateView('schema')}
@@ -71,7 +71,7 @@ export const App: React.FC = () => {
                 <span className="block text-xs font-extrabold text-[#1e3a8a] mb-0.5">
                   헌법원리와제도
                 </span>
-                <h1 className="text-base sm:text-lg font-extrabold text-[#0f172a] tracking-tight group-hover:text-[#1e3a8a] transition-colors">
+                <h1 className="text-[15.5px] sm:text-lg font-extrabold text-[#0f172a] tracking-tight group-hover:text-[#1e3a8a] transition-colors truncate">
                   사법부 기출·사례 복습
                 </h1>
               </button>
@@ -113,11 +113,11 @@ export const App: React.FC = () => {
             </nav>
 
             {/* 우측: AI 질문 템플릿 버튼 */}
-            <div className="justify-self-end">
+            <div className="justify-self-end shrink-0">
               <button
                 type="button"
                 onClick={() => setIsCoachOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-[#1e3a8a] text-white hover:bg-[#0f172a] transition-colors shadow-sm"
+                className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-[#1e3a8a] text-white hover:bg-[#0f172a] transition-colors shadow-sm whitespace-nowrap"
               >
                 <Copy className="w-3.5 h-3.5" />
                 <span>AI 질문 템플릿</span>

@@ -180,19 +180,9 @@ export const CaseSimulatorView: React.FC<CaseSimulatorViewProps> = ({
             </div>
           </div>
 
-          <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <p className="text-[16px] text-slate-600">
-              사건 흐름을 읽으셨다면, 다음 단계에서 타임라인과 3단계 검토 순서로 쪼개어 분석합니다.
-            </p>
-            <button
-              type="button"
-              onClick={() => goStep(1)}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg text-sm font-extrabold bg-[#0f172a] text-white hover:bg-[#1e3a8a] transition-colors shrink-0"
-            >
-              <span>다음 : 타임라인 분석하기</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+          <p className="text-[16px] text-slate-600 pt-1">
+            사건 흐름을 읽으셨다면 아래 다음 버튼으로 넘어가 타임라인과 3단계 검토 순서로 쪼개어 분석해 보세요.
+          </p>
         </section>
       )}
 
@@ -231,7 +221,7 @@ export const CaseSimulatorView: React.FC<CaseSimulatorViewProps> = ({
                   }`}
                 >
                   <div
-                    className={`sm:col-span-3 px-4 py-3.5 font-extrabold text-[16px] sm:text-[17px] flex items-center justify-between sm:border-r tabular-nums ${
+                    className={`sm:col-span-3 px-4 py-3.5 font-extrabold text-[16px] sm:text-[17px] flex flex-wrap items-center justify-between gap-1.5 sm:border-r tabular-nums ${
                       isSelected
                         ? node.isCoreTarget
                           ? 'bg-[#b91c1c] text-white border-[#b91c1c]'
@@ -544,6 +534,11 @@ export const CaseSimulatorView: React.FC<CaseSimulatorViewProps> = ({
                     헌재 심사 가능
                   </button>
                 </div>
+                {step2Policy !== null && (
+                  <p className="text-[15px] text-slate-700 leading-relaxed">
+                    외교·군사적 유불리는 대통령과 국회가 정치적 책임을 지고 결정할 영역이므로 헌재가 판단을 자제합니다.
+                  </p>
+                )}
               </div>
 
               <div className="rounded-xl border border-slate-300 border-t-4 border-t-[#1e3a8a] bg-white p-5 space-y-3">
@@ -574,6 +569,11 @@ export const CaseSimulatorView: React.FC<CaseSimulatorViewProps> = ({
                     헌재 심사 가능
                   </button>
                 </div>
+                {step2Proc !== null && (
+                  <p className="text-[15px] text-slate-700 leading-relaxed">
+                    국회 동의 없이 파병을 강행해 이라크 판례(2003헌마814)와 전제가 다르므로, 헌법 절차 위반 여부는 심사할 수 있습니다.
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -872,7 +872,13 @@ export const CaseSimulatorView: React.FC<CaseSimulatorViewProps> = ({
             className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-lg text-sm font-extrabold bg-[#0f172a] text-white hover:bg-[#1e3a8a] disabled:opacity-35 disabled:pointer-events-none shadow-sm"
           >
             <span>
-              {stepIdx < CASE_STEPS.length - 1 ? '다음 단계' : '완료'}
+              {stepIdx === 0
+                ? '다음 : 타임라인 분석'
+                : stepIdx === 1
+                ? '다음 : 핵심 쟁점 정리'
+                : stepIdx === 2
+                ? '다음 : 4단 답안 완성'
+                : '완료'}
             </span>
             <ArrowRight className="w-4 h-4" />
           </button>

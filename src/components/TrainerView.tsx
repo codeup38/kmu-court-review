@@ -79,7 +79,7 @@ function renderStemWithEmphasis(stem: string): React.ReactNode {
 
 function renderStructuredExplanation(text: string): React.ReactNode {
   const parts = text
-    .split(/(?=[①②③④])/)
+    .split(/(?<=\.|고,|며,|\),)\s+(?=[①②③④])/)
     .map((p) => p.trim())
     .filter(Boolean);
 
@@ -300,7 +300,7 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
 
           <div className="bg-[#f8fafc] rounded-xl border border-slate-200 border-l-[5px] border-l-[#1e3a8a] p-5 space-y-2.5">
             <div className="text-sm font-extrabold text-[#1e3a8a]">
-              선지별 해설
+              {question.type === 'mcq' ? '선지별 해설' : '핵심 해설'}
             </div>
             <div className="text-[17px] sm:text-[18.5px] text-slate-800 leading-[1.75]">
               {renderStructuredExplanation(question.explanation)}
@@ -551,6 +551,23 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
 
       {/* 한 문제씩 보기 */}
       {viewMode === 'single' && (
+        filteredQuestions.length === 0 ? (
+          <div className="bg-white rounded-xl border border-slate-200 p-10 text-center space-y-4 shadow-sm">
+            <p className="text-lg font-extrabold text-[#0f172a]">
+              틀린 문제를 모두 바로잡았습니다.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                setFilter('all');
+                setCurrentIndex(0);
+              }}
+              className="px-5 py-2.5 rounded-lg text-sm font-extrabold bg-[#0f172a] text-white hover:bg-[#1e3a8a] transition-colors"
+            >
+              전체 16문항으로 돌아가기
+            </button>
+          </div>
+        ) : (
         <div className="space-y-5">
           {currentQuestion && (
             <QuestionSheet
@@ -627,10 +644,25 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
             </div>
           </div>
         </div>
+        )
       )}
 
       {/* 전체 펼쳐보기 */}
       {viewMode === 'list' && (
+        filteredQuestions.length === 0 ? (
+          <div className="bg-white rounded-xl border border-slate-200 p-10 text-center space-y-4 shadow-sm">
+            <p className="text-lg font-extrabold text-[#0f172a]">
+              틀린 문제를 모두 바로잡았습니다.
+            </p>
+            <button
+              type="button"
+              onClick={() => setFilter('all')}
+              className="px-5 py-2.5 rounded-lg text-sm font-extrabold bg-[#0f172a] text-white hover:bg-[#1e3a8a] transition-colors"
+            >
+              전체 16문항으로 돌아가기
+            </button>
+          </div>
+        ) : (
         <div className="space-y-6">
           {filteredQuestions.map((q) => (
             <QuestionSheet
@@ -644,6 +676,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
             />
           ))}
         </div>
+        )
       )}
     </div>
   );
