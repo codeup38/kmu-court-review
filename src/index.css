@@ -4,7 +4,7 @@
 
 @layer base {
   html {
-    font-size: 16.5px;
+    font-size: 15.5px;
     -webkit-text-size-adjust: 100%;
   }
 
@@ -35,18 +35,34 @@
   .key-underline {
     color: #1e3a8a;
     font-weight: 800;
-    border-bottom: 2.5px solid #93c5fd;
+    border-bottom: 2px solid #93c5fd;
     padding-bottom: 1px;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  @media (min-width: 640px) {
+    .key-underline {
+      border-bottom-width: 2.5px;
+    }
   }
 
   .err-strike {
     color: #b91c1c;
     text-decoration: line-through;
-    text-decoration-thickness: 2.5px;
+    text-decoration-thickness: 2px;
     text-decoration-color: #b91c1c;
     background-color: #fee2e2;
     padding: 1px 4px;
     border-radius: 3px;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  @media (min-width: 640px) {
+    .err-strike {
+      text-decoration-thickness: 2.5px;
+    }
   }
 }
 

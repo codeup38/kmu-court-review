@@ -116,14 +116,14 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
   const isGraded = Boolean(record);
 
   return (
-    <article className="bg-white rounded-xl border border-slate-200/90 border-t-4 border-t-[#0f172a] p-6 sm:p-10 shadow-sm">
+    <article className="bg-white rounded-xl border border-slate-200/90 border-t-4 border-t-[#0f172a] px-4 py-5 sm:p-10 shadow-sm">
       {/* 출처 헤더 */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-6 border-b border-slate-200">
-        <div className="flex flex-wrap items-center gap-2.5">
-          <span className="text-sm font-extrabold bg-[#0f172a] text-white px-3 py-1 rounded tabular-nums">
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 sm:pb-4 sm:mb-6 border-b border-slate-200">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+          <span className="text-xs sm:text-sm font-extrabold bg-[#0f172a] text-white px-2.5 py-0.5 sm:px-3 sm:py-1 rounded tabular-nums">
             문항 {question.id}
           </span>
-          <span className="text-sm sm:text-[16px] font-bold text-[#1e3a8a]">
+          <span className="text-[13px] sm:text-[16px] font-bold text-[#1e3a8a]">
             {question.sourceTitle}
           </span>
         </div>
@@ -141,7 +141,7 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
       </div>
 
       {/* 질문 */}
-      <h3 className="text-lg sm:text-[23.5px] font-extrabold text-[#0f172a] leading-[1.52] mb-7">
+      <h3 className="text-[17.5px] sm:text-[23.5px] font-extrabold text-[#0f172a] leading-[1.48] sm:leading-[1.52] mb-4 sm:mb-7">
         {question.type === 'ox' && isGraded && question.answer === 'X'
           ? renderInlineStrike(
               question.stem,
@@ -153,7 +153,7 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
 
       {/* 선지 */}
       {question.type === 'mcq' && question.choices ? (
-        <div className="space-y-3">
+        <div className="space-y-2.5 sm:space-y-3">
           {question.choices.map((choiceText, idx) => {
             const choiceNum = idx + 1;
             const isSelected = record?.selected === choiceNum;
@@ -184,12 +184,12 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
                 onClick={() => {
                   if (!isGraded) onSubmit(choiceNum);
                 }}
-                className={`w-full text-left rounded-xl px-4 sm:px-5 py-4 border transition-all flex items-baseline gap-3 sm:gap-3.5 ${
+                className={`w-full text-left rounded-xl px-3.5 sm:px-5 py-3 sm:py-4 border transition-all flex items-baseline gap-2.5 sm:gap-3.5 ${
                   isGraded ? 'cursor-default' : 'cursor-pointer'
                 } ${boxStyle}`}
               >
                 <span
-                  className={`text-lg sm:text-[20px] font-extrabold shrink-0 tabular-nums ${
+                  className={`text-[16px] sm:text-[20px] font-extrabold shrink-0 tabular-nums ${
                     isGraded && isSelected && !isAnswer
                       ? 'text-[#b91c1c]'
                       : 'text-[#1e3a8a]'
@@ -198,7 +198,7 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
                   {CIRCLE_NUMS[idx]}
                 </span>
                 <div className="flex-1 space-y-1.5">
-                  <p className="text-[17px] sm:text-[19px] leading-[1.65] font-medium">
+                  <p className="text-[15px] sm:text-[19px] leading-[1.58] sm:leading-[1.65] font-medium">
                     {renderInlineStrike(choiceText, xray?.wrongSpan, isGraded)}
                   </p>
                   {isGraded && (isAnswer || isSelected) && (
@@ -221,7 +221,7 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
           })}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3.5 sm:gap-4">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
           {(['O', 'X'] as const).map((oxVal) => {
             const isSelected = record?.selected === oxVal;
             const isAnswer = question.answer === oxVal;
@@ -248,14 +248,14 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
                 onClick={() => {
                   if (!isGraded) onSubmit(oxVal);
                 }}
-                className={`rounded-xl py-4 sm:py-5 px-4 sm:px-6 border transition-all flex items-center justify-center gap-2.5 sm:gap-3 ${
+                className={`rounded-xl py-3.5 sm:py-5 px-3.5 sm:px-6 border transition-all flex items-center justify-center gap-2 sm:gap-3 ${
                   isGraded ? 'cursor-default' : 'cursor-pointer'
                 } ${btnStyle}`}
               >
-                <span className="text-2xl sm:text-3xl font-extrabold tabular-nums">
+                <span className="text-xl sm:text-3xl font-extrabold tabular-nums">
                   {oxVal}
                 </span>
-                <span className="text-base sm:text-lg font-bold">
+                <span className="text-[15px] sm:text-lg font-bold">
                   {oxVal === 'O' ? '옳다' : '틀리다'}
                 </span>
               </button>
@@ -266,16 +266,16 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
 
       {/* 채점 해설 영역 */}
       {isGraded && record && (
-        <div className="mt-8 pt-7 border-t-2 border-slate-900 space-y-6">
-          <div className="flex flex-wrap items-center gap-3">
+        <div className="mt-5 pt-5 sm:mt-8 sm:pt-7 border-t-2 border-slate-900 space-y-4 sm:space-y-6">
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
             <span
-              className={`px-3.5 py-1 rounded text-sm font-extrabold text-white ${
+              className={`px-3 sm:px-3.5 py-1 rounded text-xs sm:text-sm font-extrabold text-white ${
                 record.isCorrect ? 'bg-[#1e3a8a]' : 'bg-[#b91c1c]'
               }`}
             >
               {record.isCorrect ? '정답입니다' : '오답입니다'}
             </span>
-            <span className="text-base sm:text-lg font-extrabold text-[#0f172a] tabular-nums">
+            <span className="text-[15px] sm:text-lg font-extrabold text-[#0f172a] tabular-nums">
               정답 :{' '}
               {question.type === 'mcq'
                 ? `${CIRCLE_NUMS[Number(question.answer) - 1]}번`
@@ -284,22 +284,22 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
           </div>
 
           {(question.type === 'mcq' || question.answer === 'X') && (
-            <div className="bg-[#f8fafc] rounded-xl border border-slate-200 border-l-[5px] border-l-[#b91c1c] p-5 space-y-3">
-              <div className="text-sm font-extrabold text-[#991b1b]">
+            <div className="bg-[#f8fafc] rounded-xl border border-slate-200 border-l-[5px] border-l-[#b91c1c] p-3.5 sm:p-5 space-y-2 sm:space-y-3">
+              <div className="text-xs sm:text-sm font-extrabold text-[#991b1b]">
                 함정 교정 포인트 ({question.trapTag})
               </div>
-              <div className="space-y-2.5 text-[16.5px] sm:text-[18px] leading-relaxed">
+              <div className="space-y-2 sm:space-y-2.5 text-[14.5px] sm:text-[18px] leading-[1.62] sm:leading-relaxed">
                 {question.xrayPoints.map((xr, idx) => (
                   <div key={idx} className="text-[#0f172a]">
                     {xr.choiceNum && (
-                      <strong className="font-extrabold mr-2 tabular-nums">
+                      <strong className="font-extrabold mr-1.5 sm:mr-2 tabular-nums">
                         선지 {CIRCLE_NUMS[xr.choiceNum - 1]}
                       </strong>
                     )}
                     <del className="err-strike">{xr.wrongSpan}</del>
-                    <span className="mx-2 text-slate-400 font-bold">→</span>
+                    <span className="mx-1.5 sm:mx-2 text-slate-400 font-bold">→</span>
                     <span className="key-underline">{xr.rightSpan}</span>
-                    <span className="text-sm font-semibold text-slate-500 ml-2 tabular-nums">
+                    <span className="text-xs sm:text-sm font-semibold text-slate-500 ml-1.5 sm:ml-2 tabular-nums">
                       ({xr.basis})
                     </span>
                   </div>
@@ -308,30 +308,30 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
             </div>
           )}
 
-          <div className="bg-[#f8fafc] rounded-xl border border-slate-200 border-l-[5px] border-l-[#1e3a8a] p-5 space-y-2.5">
-            <div className="text-sm font-extrabold text-[#1e3a8a]">
+          <div className="bg-[#f8fafc] rounded-xl border border-slate-200 border-l-[5px] border-l-[#1e3a8a] p-3.5 sm:p-5 space-y-2 sm:space-y-2.5">
+            <div className="text-xs sm:text-sm font-extrabold text-[#1e3a8a]">
               {question.type === 'mcq' ? '선지별 해설' : '핵심 해설'}
             </div>
-            <div className="text-[17px] sm:text-[18.5px] text-slate-800 leading-[1.75]">
+            <div className="text-[14.5px] sm:text-[18.5px] text-slate-800 leading-[1.65] sm:leading-[1.75]">
               {renderStructuredExplanation(question.explanation)}
             </div>
-            <p className="text-sm font-semibold text-slate-500 tabular-nums pt-1">
+            <p className="text-xs sm:text-sm font-semibold text-slate-500 tabular-nums pt-0.5 sm:pt-1">
               근거 : {question.referenceBasis}
             </p>
           </div>
 
-          <div className="pt-2 flex flex-wrap items-center gap-2.5">
+          <div className="pt-1 sm:pt-2 grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5">
             <button
               type="button"
               onClick={onOpenExplainAI}
-              className="px-4 py-2.5 rounded-lg text-sm font-bold bg-[#0f172a] text-white hover:bg-[#1e3a8a] transition-colors"
+              className="w-full sm:w-auto px-4 py-2.5 rounded-lg text-[13.5px] sm:text-sm font-bold bg-[#0f172a] text-white hover:bg-[#1e3a8a] transition-colors text-center"
             >
               이 문제 AI에게 질문하기
             </button>
             <button
               type="button"
               onClick={onOpenVariantAI}
-              className="px-4 py-2.5 rounded-lg text-sm font-bold bg-[#eff6ff] text-[#1e3a8a] border border-[#93c5fd] hover:bg-[#1e3a8a] hover:text-white transition-colors"
+              className="w-full sm:w-auto px-4 py-2.5 rounded-lg text-[13.5px] sm:text-sm font-bold bg-[#eff6ff] text-[#1e3a8a] border border-[#93c5fd] hover:bg-[#1e3a8a] hover:text-white transition-colors text-center"
             >
               비슷한 변형문제 더 풀기
             </button>
@@ -477,9 +477,9 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3.5 sm:space-y-6">
       {/* 단일 컨트롤 바 */}
-      <div className="bg-white rounded-xl border border-slate-200/90 p-4 sm:px-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3.5">
+      <div className="bg-white rounded-xl border border-slate-200/90 p-3 sm:p-4 sm:px-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-2.5 sm:gap-3.5">
         <div className="flex flex-wrap items-center gap-1.5">
           {(
             [
@@ -501,7 +501,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
                   setFilter(f.id);
                   setCurrentIndex(0);
                 }}
-                className={`px-3.5 py-2 rounded-lg text-sm font-bold transition-colors tabular-nums ${
+                className={`px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-lg text-[13px] sm:text-sm font-bold transition-colors tabular-nums ${
                   active
                     ? 'bg-[#0f172a] text-white'
                     : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -513,7 +513,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
           })}
         </div>
 
-        <div className="flex flex-wrap items-center justify-between md:justify-end gap-3 text-sm font-bold text-slate-600 tabular-nums border-t md:border-t-0 border-slate-100 pt-2.5 md:pt-0">
+        <div className="flex flex-wrap items-center justify-between md:justify-end gap-3 text-xs sm:text-sm font-bold text-slate-600 tabular-nums border-t md:border-t-0 border-slate-100 pt-2 md:pt-0">
           <button
             type="button"
             onClick={() =>
@@ -524,51 +524,53 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
             {viewMode === 'single' ? '전체 펼쳐보기' : '한 문제씩 보기'}
           </button>
 
-          <span className="text-slate-300">|</span>
+          <span className="text-slate-300 hidden md:inline">|</span>
 
-          <span>
-            풀이 <strong className="text-[#0f172a]">{totalSolved}/16</strong>
-          </span>
-
-          {totalSolved > 0 && !confirmReset && (
-            <button
-              type="button"
-              onClick={() => setConfirmReset(true)}
-              className="text-xs font-bold text-slate-400 hover:text-[#b91c1c] underline"
-            >
-              초기화
-            </button>
-          )}
-          {confirmReset && (
-            <span className="inline-flex items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => {
-                  onResetAllAnswers();
-                  setFilter('all');
-                  setConfirmReset(false);
-                }}
-                className="px-2 py-0.5 rounded text-xs font-extrabold bg-[#b91c1c] text-white"
-              >
-                확인
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfirmReset(false)}
-                className="text-xs text-slate-500"
-              >
-                취소
-              </button>
+          <div className="inline-flex items-center gap-2.5">
+            <span>
+              풀이 <strong className="text-[#0f172a]">{totalSolved}/16</strong>
             </span>
-          )}
+
+            {totalSolved > 0 && !confirmReset && (
+              <button
+                type="button"
+                onClick={() => setConfirmReset(true)}
+                className="text-xs font-bold text-slate-400 hover:text-[#b91c1c] underline"
+              >
+                초기화
+              </button>
+            )}
+            {confirmReset && (
+              <span className="inline-flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    onResetAllAnswers();
+                    setFilter('all');
+                    setConfirmReset(false);
+                  }}
+                  className="px-2 py-0.5 rounded text-xs font-extrabold bg-[#b91c1c] text-white"
+                >
+                  확인
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmReset(false)}
+                  className="text-xs text-slate-500"
+                >
+                  취소
+                </button>
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
       {/* 한 문제씩 보기 */}
       {viewMode === 'single' && (
         filteredQuestions.length === 0 ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-10 text-center space-y-4 shadow-sm">
-            <p className="text-lg font-extrabold text-[#0f172a]">
+          <div className="bg-white rounded-xl border border-slate-200 p-8 sm:p-10 text-center space-y-4 shadow-sm">
+            <p className="text-base sm:text-lg font-extrabold text-[#0f172a]">
               틀린 문제를 모두 바로잡았습니다.
             </p>
             <button
@@ -583,7 +585,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
             </button>
           </div>
         ) : (
-        <div className="space-y-5">
+        <div className="space-y-3.5 sm:space-y-5">
           {currentQuestion && (
             <QuestionSheet
               key={currentQuestion.id}
@@ -596,8 +598,8 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
             />
           )}
 
-          {/* 하단 정중앙 고정 3열 그리드 페이지네이션 */}
-          <div className="bg-white rounded-xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
+          {/* 하단 정중앙 고정 3열 그리드 페이지네이션 (모바일 16문항은 8x2 정배열) */}
+          <div className="bg-white rounded-xl border border-slate-200 p-3.5 sm:p-5 shadow-sm space-y-3 sm:space-y-4">
             <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
               <div className="justify-self-start">
                 <button
@@ -606,7 +608,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
                     setCurrentIndex((prev) => Math.max(0, prev - 1))
                   }
                   disabled={currentIndex === 0}
-                  className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2.5 rounded-lg text-sm font-bold border border-slate-300 text-slate-700 hover:border-[#0f172a] disabled:opacity-35 disabled:pointer-events-none"
+                  className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-[13px] sm:text-sm font-bold border border-slate-300 text-slate-700 hover:border-[#0f172a] disabled:opacity-35 disabled:pointer-events-none"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   <span>이전</span>
@@ -626,7 +628,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
                     )
                   }
                   disabled={currentIndex >= filteredQuestions.length - 1}
-                  className="inline-flex items-center gap-1.5 px-4 sm:px-5 py-2.5 rounded-lg text-sm font-extrabold bg-[#0f172a] text-white hover:bg-[#1e3a8a] disabled:opacity-35 disabled:pointer-events-none"
+                  className="inline-flex items-center gap-1.5 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-lg text-[13px] sm:text-sm font-extrabold bg-[#0f172a] text-white hover:bg-[#1e3a8a] disabled:opacity-35 disabled:pointer-events-none"
                 >
                   <span>다음</span>
                   <ArrowRight className="w-4 h-4" />
@@ -634,7 +636,13 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
               </div>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-1.5 pt-2 border-t border-slate-100">
+            <div
+              className={`pt-2.5 border-t border-slate-100 gap-1.5 ${
+                filteredQuestions.length > 8
+                  ? 'grid grid-cols-8 sm:flex sm:flex-wrap sm:justify-center'
+                  : 'flex flex-wrap justify-center'
+              }`}
+            >
               {filteredQuestions.map((q, idx) => {
                 const rec = answers[q.id];
                 const isCurrent = idx === currentIndex;
@@ -648,7 +656,9 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
                     key={q.id}
                     type="button"
                     onClick={() => setCurrentIndex(idx)}
-                    className={`w-8 h-8 rounded-md text-xs font-extrabold tabular-nums transition-all ${pill} ${
+                    className={`${
+                      filteredQuestions.length > 8 ? 'w-full sm:w-8' : 'w-8'
+                    } h-8 rounded-md text-xs font-extrabold tabular-nums transition-all ${pill} ${
                       isCurrent ? 'ring-2 ring-[#0f172a]' : ''
                     }`}
                   >
@@ -665,8 +675,8 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
       {/* 전체 펼쳐보기 */}
       {viewMode === 'list' && (
         filteredQuestions.length === 0 ? (
-          <div className="bg-white rounded-xl border border-slate-200 p-10 text-center space-y-4 shadow-sm">
-            <p className="text-lg font-extrabold text-[#0f172a]">
+          <div className="bg-white rounded-xl border border-slate-200 p-8 sm:p-10 text-center space-y-4 shadow-sm">
+            <p className="text-base sm:text-lg font-extrabold text-[#0f172a]">
               틀린 문제를 모두 바로잡았습니다.
             </p>
             <button
@@ -678,7 +688,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
             </button>
           </div>
         ) : (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {filteredQuestions.map((q) => (
             <QuestionSheet
               key={q.id}

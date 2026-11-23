@@ -105,9 +105,9 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
         className="relative z-10 h-full w-full max-w-lg bg-white border-l border-slate-200 flex flex-col shadow-2xl"
       >
         {/* 헤더 */}
-        <div className="px-6 py-5 border-b border-slate-200 flex items-start justify-between gap-4">
+        <div className="px-4 py-4 sm:px-6 sm:py-5 border-b border-slate-200 flex items-start justify-between gap-3 sm:gap-4">
           <div className="space-y-1">
-            <h2 className="text-xl font-extrabold text-[#0f172a]">
+            <h2 className="text-lg sm:text-xl font-extrabold text-[#0f172a]">
               AI 질문 템플릿
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
@@ -125,10 +125,10 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
         </div>
 
         {/* 본문 */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:p-6 space-y-5 sm:space-y-6">
           {/* 1. 템플릿 선택 */}
-          <div className="space-y-2.5">
-            <div className="flex items-center justify-between text-sm">
+          <div className="space-y-2 sm:space-y-2.5">
+            <div className="flex items-center justify-between text-[13.5px] sm:text-sm">
               <span className="font-extrabold text-[#0f172a]">
                 1. 필요한 질문 템플릿 선택
               </span>
@@ -150,16 +150,16 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
                       setSelectedPreset(tpl.id);
                       setCopiedState(false);
                     }}
-                    className={`w-full text-left rounded-xl p-4 border transition-all ${
+                    className={`w-full text-left rounded-xl p-3.5 sm:p-4 border transition-all ${
                       active
                         ? 'bg-[#eff6ff] border-2 border-[#1e3a8a]'
                         : 'bg-white border-slate-200 hover:border-slate-300'
                     }`}
                   >
-                    <div className="text-[15.5px] font-extrabold text-[#0f172a] mb-0.5">
+                    <div className="text-[14.5px] sm:text-[15.5px] font-extrabold text-[#0f172a] mb-0.5">
                       {tpl.title}
                     </div>
-                    <p className="text-sm text-slate-600 leading-relaxed">
+                    <p className="text-[13px] sm:text-sm text-slate-600 leading-relaxed">
                       {tpl.desc}
                     </p>
                   </button>
@@ -172,7 +172,7 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
           <div className="space-y-2">
             <label
               htmlFor="drawer-custom-memo"
-              className="block text-sm font-extrabold text-[#0f172a]"
+              className="block text-[13.5px] sm:text-sm font-extrabold text-[#0f172a]"
             >
               2. 특별히 궁금한 점 덧붙이기{' '}
               <span className="font-semibold text-slate-400">(선택)</span>
@@ -186,7 +186,7 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
                 setCopiedState(false);
               }}
               placeholder="예: 대법관회의와 대법원 심판 합의체의 차이를 쉽게 비교해 줘"
-              className="w-full px-4 py-3 rounded-xl text-sm bg-slate-50 focus:bg-white border border-slate-300 text-[#0f172a] focus:outline-none focus:border-[#1e3a8a]"
+              className="w-full px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl text-[16px] sm:text-sm bg-slate-50 focus:bg-white border border-slate-300 text-[#0f172a] focus:outline-none focus:border-[#1e3a8a]"
             />
           </div>
 

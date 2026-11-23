@@ -70,7 +70,7 @@ export const InstantPromptModal: React.FC<InstantPromptModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div
         onClick={onClose}
         className="fixed inset-0 bg-slate-900/45 backdrop-blur-[1px]"
@@ -79,15 +79,15 @@ export const InstantPromptModal: React.FC<InstantPromptModalProps> = ({
         role="dialog"
         aria-modal="true"
         aria-label={data.title}
-        className="relative z-10 w-full max-w-xl bg-white rounded-2xl border border-slate-200 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
+        className="relative z-10 w-full max-w-xl bg-white rounded-t-2xl sm:rounded-2xl border-t sm:border border-slate-200 shadow-2xl flex flex-col max-h-[88dvh] sm:max-h-[90vh] overflow-hidden"
       >
         {/* 모달 헤더 */}
-        <div className="px-6 py-5 border-b border-slate-200 flex items-start justify-between gap-4">
-          <div className="space-y-1">
+        <div className="px-4 py-4 sm:px-6 sm:py-5 border-b border-slate-200 flex items-start justify-between gap-3 sm:gap-4">
+          <div className="space-y-0.5 sm:space-y-1">
             <span className="text-xs font-extrabold text-[#1e3a8a] block">
               맞춤형 질문 프롬프트 복사
             </span>
-            <h3 className="text-lg sm:text-xl font-extrabold text-[#0f172a]">
+            <h3 className="text-[17px] sm:text-xl font-extrabold text-[#0f172a] leading-snug">
               {data.title}
             </h3>
             <p className="text-xs sm:text-sm text-slate-500">{data.subtitle}</p>
@@ -103,12 +103,12 @@ export const InstantPromptModal: React.FC<InstantPromptModalProps> = ({
         </div>
 
         {/* 모달 본문 */}
-        <div className="p-6 overflow-y-auto space-y-5">
+        <div className="p-4 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:p-6 overflow-y-auto space-y-4 sm:space-y-5">
           {/* 1. 내 생각 · 헷갈린 점 입력 (선택) */}
           <div className="space-y-2">
             <label
               htmlFor="instant-user-note"
-              className="block text-sm font-extrabold text-[#0f172a]"
+              className="block text-[13.5px] sm:text-sm font-extrabold text-[#0f172a]"
             >
               1. 헷갈렸던 점이나 내 생각을 덧붙여 보세요{' '}
               <span className="font-semibold text-slate-400">(선택)</span>
@@ -122,16 +122,16 @@ export const InstantPromptModal: React.FC<InstantPromptModalProps> = ({
                 setCopied(false);
               }}
               placeholder={data.placeholder}
-              className="w-full rounded-xl border border-slate-300 bg-slate-50 focus:bg-white p-3.5 text-sm sm:text-[15px] text-[#0f172a] leading-relaxed focus:outline-none focus:border-[#1e3a8a]"
+              className="w-full rounded-xl border border-slate-300 bg-slate-50 focus:bg-white p-3 sm:p-3.5 text-[16px] sm:text-[15px] text-[#0f172a] leading-relaxed focus:outline-none focus:border-[#1e3a8a]"
             />
           </div>
 
           {/* 2. 원클릭 프롬프트 복사 */}
-          <div className="space-y-2.5">
+          <div className="space-y-2 sm:space-y-2.5">
             <button
               type="button"
               onClick={() => copyText(promptText)}
-              className={`w-full py-3.5 px-5 rounded-xl text-base font-extrabold transition-colors flex items-center justify-center gap-2 shadow-sm ${
+              className={`w-full py-3 sm:py-3.5 px-4 sm:px-5 rounded-xl text-[14.5px] sm:text-base font-extrabold transition-colors flex items-center justify-center gap-2 shadow-sm ${
                 copied
                   ? 'bg-[#0f766e] text-white'
                   : 'bg-[#0f172a] text-white hover:bg-[#1e3a8a]'
@@ -139,12 +139,12 @@ export const InstantPromptModal: React.FC<InstantPromptModalProps> = ({
             >
               {copied ? (
                 <>
-                  <Check className="w-5 h-5" />
-                  <span>프롬프트 복사 완료 — 아래 AI에 바로 붙여넣기 하세요</span>
+                  <Check className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+                  <span>복사 완료 — 아래 AI에 붙여넣기 하세요</span>
                 </>
               ) : (
                 <>
-                  <Copy className="w-4 h-4" />
+                  <Copy className="w-4 h-4 shrink-0" />
                   <span>맞춤형 질문 프롬프트 복사하기</span>
                 </>
               )}

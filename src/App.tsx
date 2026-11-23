@@ -57,27 +57,27 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f1f5f9] text-[#0f172a]">
-      {/* 상단 스티키 헤더 (PC 정중앙 3열 그리드 · 이름 제거) */}
+      {/* 상단 스티키 헤더 (PC 정중앙 3열 그리드 · 모바일 슬림 언더라인 탭) */}
       <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="min-h-[68px] py-2.5 flex items-center justify-between md:grid md:grid-cols-[1fr_auto_1fr] gap-3">
+        <div className="max-w-5xl mx-auto px-3.5 sm:px-6 lg:px-8">
+          <div className="min-h-[50px] md:min-h-[68px] py-2 md:py-2.5 flex items-center justify-between md:grid md:grid-cols-[1fr_auto_1fr] gap-2.5 md:gap-3">
             {/* 좌측 타이틀 */}
             <div className="justify-self-start min-w-0">
               <button
                 type="button"
                 onClick={() => handleNavigateView('schema')}
-                className="text-left group"
+                className="text-left group block"
               >
-                <span className="block text-xs font-extrabold text-[#1e3a8a] mb-0.5">
+                <span className="block text-[11px] sm:text-xs font-extrabold text-[#1e3a8a] leading-tight mb-0.5">
                   헌법원리와제도
                 </span>
-                <h1 className="text-[15.5px] sm:text-lg font-extrabold text-[#0f172a] tracking-tight group-hover:text-[#1e3a8a] transition-colors truncate">
+                <h1 className="text-[15.5px] sm:text-lg font-extrabold text-[#0f172a] tracking-tight leading-tight group-hover:text-[#1e3a8a] transition-colors truncate">
                   사법부 기출·사례 복습
                 </h1>
               </button>
             </div>
 
-            {/* 정중앙 3개 탭 (데스크톱) */}
+            {/* 정중앙 3개 탭 (데스크톱 · 태블릿) */}
             <nav
               aria-label="주요 학습 메뉴"
               className="hidden md:flex items-center justify-self-center bg-[#f1f5f9] p-1 rounded-xl border border-slate-200"
@@ -117,7 +117,7 @@ export const App: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsCoachOpen(true)}
-                className="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-[#1e3a8a] text-white hover:bg-[#0f172a] transition-colors shadow-sm whitespace-nowrap"
+                className="inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm font-extrabold bg-[#1e3a8a] text-white hover:bg-[#0f172a] transition-colors shadow-sm whitespace-nowrap"
               >
                 <Copy className="w-3.5 h-3.5" />
                 <span>AI 질문 템플릿</span>
@@ -130,10 +130,10 @@ export const App: React.FC = () => {
             </div>
           </div>
 
-          {/* 모바일 3개 탭 바 */}
+          {/* 모바일 전용 슬림 언더라인 3탭 바 (하단 서브탭 박스와 시각적 중첩 제거) */}
           <nav
             aria-label="모바일 학습 메뉴"
-            className="grid grid-cols-3 md:hidden border-t border-slate-100 py-2 gap-1.5"
+            className="grid grid-cols-3 md:hidden border-t border-slate-100 -mx-3.5 px-2"
           >
             {MAIN_TABS.map((tab) => {
               const isActive = activeView === tab.id;
@@ -142,13 +142,24 @@ export const App: React.FC = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => handleNavigateView(tab.id)}
-                  className={`py-2 rounded-lg text-sm font-bold text-center transition-colors ${
+                  className={`relative py-2.5 text-[14px] font-extrabold text-center transition-colors ${
                     isActive
-                      ? 'bg-[#0f172a] text-white'
-                      : 'bg-slate-50 text-slate-600'
+                      ? 'text-[#0f172a]'
+                      : 'text-slate-400 hover:text-slate-700'
                   }`}
                 >
-                  {tab.label}
+                  <span>{tab.label}</span>
+                  {isActive && (
+                    <motion.span
+                      layoutId="mobileMainTabUnderline"
+                      transition={{
+                        type: 'spring',
+                        stiffness: 500,
+                        damping: 38,
+                      }}
+                      className="absolute bottom-0 left-3 right-3 h-[2.5px] bg-[#0f172a] rounded-full"
+                    />
+                  )}
                 </button>
               );
             })}
@@ -157,7 +168,7 @@ export const App: React.FC = () => {
       </header>
 
       {/* 메인 본문 */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-9">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-3.5 sm:px-6 lg:px-8 pt-3.5 pb-8 sm:py-9">
         {activeView === 'schema' && (
           <SchemaView
             onNavigateToQuestion={handleNavigateToQuestion}
@@ -187,9 +198,9 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {/* 하단 푸터 (발표 자료 말미 크레딧 느낌으로 자연스럽게) */}
-      <footer className="bg-white border-t border-slate-200 mt-10">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm text-slate-500">
+      {/* 하단 푸터 (모바일 iOS 플로팅 주소창 대비 하단 안전 여백 확보) */}
+      <footer className="bg-white border-t border-slate-200 mt-4 sm:mt-10 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:pb-0">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-1.5 sm:gap-2 text-xs sm:text-sm text-slate-500">
           <span className="font-semibold">
             헌법원리와제도 · 사법부 기출·사례 복습
           </span>
