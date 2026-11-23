@@ -75,18 +75,18 @@ export const InstantPromptModal: React.FC<InstantPromptModalProps> = ({
         {/* 모달 헤더 */}
         <div className="px-6 py-5 border-b border-slate-200 flex items-start justify-between gap-4">
           <div className="space-y-1">
-            <span className="text-xs sm:text-sm font-extrabold text-[#1e3a8a] block">
+            <span className="text-xs font-extrabold text-[#1e3a8a] block">
               맞춤형 질문 프롬프트 복사
             </span>
-            <h3 className="text-xl font-extrabold text-[#0f172a]">
+            <h3 className="text-lg sm:text-xl font-extrabold text-[#0f172a]">
               {data.title}
             </h3>
-            <p className="text-sm text-slate-500">{data.subtitle}</p>
+            <p className="text-xs sm:text-sm text-slate-500">{data.subtitle}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:text-slate-900 shrink-0"
+            className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-900 shrink-0"
             aria-label="닫기"
           >
             <X className="w-4 h-4" />
@@ -94,12 +94,12 @@ export const InstantPromptModal: React.FC<InstantPromptModalProps> = ({
         </div>
 
         {/* 모달 본문 */}
-        <div className="p-6 overflow-y-auto space-y-6">
+        <div className="p-6 overflow-y-auto space-y-5">
           {/* 1. 내 생각 · 헷갈린 점 입력 (선택) */}
           <div className="space-y-2">
             <label
               htmlFor="instant-user-note"
-              className="block text-[15.5px] font-extrabold text-[#0f172a]"
+              className="block text-sm font-extrabold text-[#0f172a]"
             >
               1. 헷갈렸던 점이나 내 생각을 덧붙여 보세요{' '}
               <span className="font-semibold text-slate-400">(선택)</span>
@@ -113,25 +113,25 @@ export const InstantPromptModal: React.FC<InstantPromptModalProps> = ({
                 setCopied(false);
               }}
               placeholder={data.placeholder}
-              className="w-full rounded-xl border border-slate-300 bg-slate-50 focus:bg-white p-4 text-[15.5px] text-[#0f172a] leading-relaxed focus:outline-none focus:border-[#1e3a8a]"
+              className="w-full rounded-xl border border-slate-300 bg-slate-50 focus:bg-white p-3.5 text-sm sm:text-[15px] text-[#0f172a] leading-relaxed focus:outline-none focus:border-[#1e3a8a]"
             />
           </div>
 
           {/* 2. 원클릭 프롬프트 복사 */}
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <button
               type="button"
               onClick={() => copyText(promptText)}
               className={`w-full py-3.5 px-5 rounded-xl text-base font-extrabold transition-colors flex items-center justify-center gap-2 shadow-sm ${
                 copied
-                  ? 'bg-emerald-700 text-white'
+                  ? 'bg-[#0f766e] text-white'
                   : 'bg-[#0f172a] text-white hover:bg-[#1e3a8a]'
               }`}
             >
               {copied ? (
                 <>
                   <Check className="w-5 h-5" />
-                  <span>복사 완료 — 아래 AI에 바로 붙여넣기 하세요</span>
+                  <span>프롬프트 복사 완료 — 아래 AI에 바로 붙여넣기 하세요</span>
                 </>
               ) : (
                 <>
@@ -144,35 +144,35 @@ export const InstantPromptModal: React.FC<InstantPromptModalProps> = ({
             <button
               type="button"
               onClick={() => setPreviewOpen((prev) => !prev)}
-              className="w-full py-1.5 px-3 rounded-lg text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1"
+              className="w-full py-2 px-3 rounded-lg text-xs font-bold text-slate-500 hover:text-slate-900 hover:bg-slate-50 flex items-center justify-center gap-1"
             >
               <span>
-                {previewOpen ? '프롬프트 전문 닫기' : '복사될 프롬프트 전문 미리보기'}
+                {previewOpen ? '복사될 프롬프트 전문 닫기' : '복사될 프롬프트 전문 미리보기'}
               </span>
               {previewOpen ? (
-                <ChevronUp className="w-4 h-4" />
+                <ChevronUp className="w-3.5 h-3.5" />
               ) : (
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="w-3.5 h-3.5" />
               )}
             </button>
 
             {previewOpen && (
-              <pre className="w-full max-h-52 overflow-y-auto rounded-xl bg-slate-900 text-slate-100 p-4 text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap font-sans">
+              <pre className="w-full max-h-52 overflow-y-auto rounded-xl bg-slate-900 text-slate-100 p-4 text-xs leading-relaxed whitespace-pre-wrap font-sans">
                 {promptText}
               </pre>
             )}
           </div>
 
-          {/* 3. 학교 무료 제공 AI 전용 안내 박스 (상용 AI와 명확히 분리) */}
-          <div className="rounded-2xl border border-[#93c5fd] bg-[#eff6ff]/70 p-5 space-y-3.5">
+          {/* 3. 학교 무료 제공 AI 전용 안내 (상용 AI와 문맥 분리) */}
+          <div className="rounded-xl border border-[#93c5fd] bg-[#eff6ff]/70 p-4 sm:p-5 space-y-3">
             <div className="space-y-1.5">
-              <div className="text-[15.5px] font-extrabold text-[#1e3a8a]">
-                학교 무료 제공 AI(FactChat)로 무료 복습하기
+              <div className="text-sm font-extrabold text-[#1e3a8a]">
+                2. 학교 무료 제공 AI(FactChat)로 바로 질문하기
               </div>
-              <p className="text-[14.5px] text-slate-800 leading-relaxed">
-                학교 계정(온국민 포털)으로 로그인만 하면 별도 결제 없이 유료 AI 모델들로 바로 해설과 변형문제를 받아볼 수 있습니다.
+              <p className="text-[13.5px] sm:text-sm text-slate-700 leading-relaxed">
+                학교 계정(온국민 포털)으로 로그인만 하면 별도 비용 없이 유료 AI 모델들로 바로 해설과 변형문제를 받아볼 수 있습니다.
               </p>
-              <p className="text-[13.5px] text-[#1e3a8a] font-bold leading-relaxed">
+              <p className="text-xs sm:text-[13.5px] font-bold text-[#1e3a8a] leading-relaxed">
                 ※ 학교 AI 안에서 무제한 무료 모델 대신 ChatGPT 6.2 Sol, Claude Opus 5.5 등 최신 모델 사용을 권장합니다.
               </p>
             </div>
@@ -184,19 +184,19 @@ export const InstantPromptModal: React.FC<InstantPromptModalProps> = ({
               onClick={() => {
                 if (!copied) copyText(promptText);
               }}
-              className="w-full py-3.5 px-4 rounded-xl text-[15px] font-extrabold bg-[#1e3a8a] text-white hover:bg-[#0f172a] transition-colors flex items-center justify-center gap-2 shadow-sm"
+              className="w-full py-3 px-4 rounded-xl text-sm sm:text-[15px] font-extrabold bg-[#1e3a8a] text-white hover:bg-[#0f172a] transition-colors flex items-center justify-center gap-2 shadow-sm"
             >
               <span>학교 무료 제공 AI 열기 (온국민 포털 로그인)</span>
               <ExternalLink className="w-4 h-4 shrink-0" />
             </a>
           </div>
 
-          {/* 4. 박스 바깥으로 분리된 개인 상용 AI 바로가기 */}
-          <div className="pt-1 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
-            <span className="text-xs sm:text-sm font-semibold text-slate-500">
+          {/* 4. 개인 구독 상용 AI 바로가기 (별도 분리) */}
+          <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100">
+            <span className="text-xs font-semibold text-slate-500">
               개인 구독 AI에 붙여넣기
             </span>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {PERSONAL_AI_LINKS.map((item) => (
                 <a
                   key={item.label}
@@ -206,7 +206,7 @@ export const InstantPromptModal: React.FC<InstantPromptModalProps> = ({
                   onClick={() => {
                     if (!copied) copyText(promptText);
                   }}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-bold bg-slate-50 border border-slate-200 text-slate-700 hover:border-[#0f172a] hover:text-[#0f172a]"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-50 border border-slate-300 text-slate-700 hover:border-[#1e3a8a] hover:text-[#1e3a8a]"
                 >
                   <span>{item.label}</span>
                   <ExternalLink className="w-3 h-3" />

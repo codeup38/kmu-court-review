@@ -57,10 +57,10 @@ export const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#f1f5f9] text-[#0f172a]">
-      {/* 상단 스티키 헤더 */}
+      {/* 상단 스티키 헤더 (PC 정중앙 3열 그리드 · 이름 제거) */}
       <header className="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="min-h-[72px] py-3 flex items-center justify-between md:grid md:grid-cols-[1fr_auto_1fr] gap-3">
+          <div className="min-h-[68px] py-2.5 flex items-center justify-between md:grid md:grid-cols-[1fr_auto_1fr] gap-3">
             {/* 좌측 타이틀 */}
             <div className="justify-self-start">
               <button
@@ -71,7 +71,7 @@ export const App: React.FC = () => {
                 <span className="block text-xs font-extrabold text-[#1e3a8a] mb-0.5">
                   헌법원리와제도
                 </span>
-                <h1 className="text-lg sm:text-[19px] font-extrabold text-[#0f172a] tracking-tight group-hover:text-[#1e3a8a] transition-colors">
+                <h1 className="text-base sm:text-lg font-extrabold text-[#0f172a] tracking-tight group-hover:text-[#1e3a8a] transition-colors">
                   사법부 기출·사례 복습
                 </h1>
               </button>
@@ -80,7 +80,7 @@ export const App: React.FC = () => {
             {/* 정중앙 3개 탭 (데스크톱) */}
             <nav
               aria-label="주요 학습 메뉴"
-              className="hidden md:flex items-center justify-self-center bg-slate-100/90 p-1 rounded-xl border border-slate-200/80"
+              className="hidden md:flex items-center justify-self-center bg-[#f1f5f9] p-1 rounded-xl border border-slate-200"
             >
               {MAIN_TABS.map((tab) => {
                 const isActive = activeView === tab.id;
@@ -89,7 +89,7 @@ export const App: React.FC = () => {
                     key={tab.id}
                     type="button"
                     onClick={() => handleNavigateView(tab.id)}
-                    className={`relative px-5 py-2 rounded-lg text-[15.5px] font-bold transition-colors ${
+                    className={`relative px-4 py-2 rounded-lg text-[15px] font-bold transition-colors ${
                       isActive
                         ? 'text-white'
                         : 'text-slate-600 hover:text-slate-900'
@@ -117,7 +117,7 @@ export const App: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsCoachOpen(true)}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-extrabold bg-[#1e3a8a] text-white hover:bg-[#0f172a] transition-colors shadow-sm"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-extrabold bg-[#1e3a8a] text-white hover:bg-[#0f172a] transition-colors shadow-sm"
               >
                 <Copy className="w-3.5 h-3.5" />
                 <span>AI 질문 템플릿</span>
@@ -142,7 +142,7 @@ export const App: React.FC = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => handleNavigateView(tab.id)}
-                  className={`py-2.5 rounded-lg text-[15px] font-bold text-center transition-colors ${
+                  className={`py-2 rounded-lg text-sm font-bold text-center transition-colors ${
                     isActive
                       ? 'bg-[#0f172a] text-white'
                       : 'bg-slate-50 text-slate-600'
@@ -157,7 +157,7 @@ export const App: React.FC = () => {
       </header>
 
       {/* 메인 본문 */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-9">
         {activeView === 'schema' && (
           <SchemaView
             onNavigateToQuestion={handleNavigateToQuestion}
@@ -187,9 +187,9 @@ export const App: React.FC = () => {
         )}
       </main>
 
-      {/* 하단 푸터 */}
-      <footer className="bg-white border-t border-slate-200 mt-12">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-slate-500">
+      {/* 하단 푸터 (발표 자료 말미 크레딧 느낌으로 자연스럽게) */}
+      <footer className="bg-white border-t border-slate-200 mt-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs sm:text-sm text-slate-500">
           <span className="font-semibold">
             헌법원리와제도 · 사법부 기출·사례 복습
           </span>
