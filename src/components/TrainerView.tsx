@@ -180,8 +180,13 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
               <button
                 key={choiceNum}
                 type="button"
-                onClick={() => onSubmit(choiceNum)}
-                className={`w-full text-left rounded-xl px-4 sm:px-5 py-4 border transition-all flex items-baseline gap-3 sm:gap-3.5 ${boxStyle}`}
+                disabled={isGraded}
+                onClick={() => {
+                  if (!isGraded) onSubmit(choiceNum);
+                }}
+                className={`w-full text-left rounded-xl px-4 sm:px-5 py-4 border transition-all flex items-baseline gap-3 sm:gap-3.5 ${
+                  isGraded ? 'cursor-default' : 'cursor-pointer'
+                } ${boxStyle}`}
               >
                 <span
                   className={`text-lg sm:text-[20px] font-extrabold shrink-0 tabular-nums ${
@@ -239,8 +244,13 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
               <button
                 key={oxVal}
                 type="button"
-                onClick={() => onSubmit(oxVal)}
-                className={`rounded-xl py-4 sm:py-5 px-4 sm:px-6 border transition-all flex items-center justify-center gap-2.5 sm:gap-3 ${btnStyle}`}
+                disabled={isGraded}
+                onClick={() => {
+                  if (!isGraded) onSubmit(oxVal);
+                }}
+                className={`rounded-xl py-4 sm:py-5 px-4 sm:px-6 border transition-all flex items-center justify-center gap-2.5 sm:gap-3 ${
+                  isGraded ? 'cursor-default' : 'cursor-pointer'
+                } ${btnStyle}`}
               >
                 <span className="text-2xl sm:text-3xl font-extrabold tabular-nums">
                   {oxVal}
@@ -385,6 +395,9 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
   }, [filteredQuestions.length, currentIndex]);
 
   const currentQuestion = filteredQuestions[currentIndex] ?? null;
+  const isCurrentGraded = currentQuestion
+    ? Boolean(answers[currentQuestion.id])
+    : false;
 
   useEffect(() => {
     if (viewMode !== 'single' || !currentQuestion || isOverlayOpen) return;
@@ -410,12 +423,13 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
           Math.min(filteredQuestions.length - 1, prev + 1)
         );
       } else if (
+        !isCurrentGraded &&
         currentQuestion.type === 'mcq' &&
         ['1', '2', '3', '4'].includes(e.key)
       ) {
         e.preventDefault();
         onSubmitAnswer(currentQuestion.id, Number(e.key));
-      } else if (currentQuestion.type === 'ox') {
+      } else if (!isCurrentGraded && currentQuestion.type === 'ox') {
         if (e.key === 'o' || e.key === 'O') {
           e.preventDefault();
           onSubmitAnswer(currentQuestion.id, 'O');
@@ -431,6 +445,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
   }, [
     viewMode,
     currentQuestion,
+    isCurrentGraded,
     filteredQuestions.length,
     isOverlayOpen,
     onSubmitAnswer,

@@ -47,17 +47,20 @@ export function useStudyStore() {
       const q = QUESTIONS_DATA.find((item) => item.id === questionId);
       if (!q) return;
       const isCorrect = q.answer === selected;
-      setState((prev) => ({
-        ...prev,
-        answers: {
-          ...prev.answers,
-          [questionId]: {
-            selected,
-            isCorrect,
-            answeredAt: Date.now(),
+      setState((prev) => {
+        if (prev.answers[questionId]) return prev;
+        return {
+          ...prev,
+          answers: {
+            ...prev.answers,
+            [questionId]: {
+              selected,
+              isCorrect,
+              answeredAt: Date.now(),
+            },
           },
-        },
-      }));
+        };
+      });
     },
     []
   );
