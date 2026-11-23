@@ -49,6 +49,53 @@ function renderInlineStrike(
   );
 }
 
+function renderStemWithEmphasis(stem: string): React.ReactNode {
+  if (stem.includes('옳지 않은')) {
+    const idx = stem.indexOf('옳지 않은');
+    return (
+      <>
+        {stem.slice(0, idx)}
+        <span className="text-[#b91c1c] underline decoration-[#b91c1c] decoration-2 underline-offset-4">
+          옳지 않은
+        </span>
+        {stem.slice(idx + 5)}
+      </>
+    );
+  }
+  if (stem.includes('옳은')) {
+    const idx = stem.indexOf('옳은');
+    return (
+      <>
+        {stem.slice(0, idx)}
+        <span className="text-[#1e3a8a] underline decoration-[#1e3a8a] decoration-2 underline-offset-4">
+          옳은
+        </span>
+        {stem.slice(idx + 2)}
+      </>
+    );
+  }
+  return stem;
+}
+
+function renderStructuredExplanation(text: string): React.ReactNode {
+  const parts = text
+    .split(/(?=[①②③④])/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  if (parts.length <= 1) {
+    return <p>{text}</p>;
+  }
+
+  return (
+    <div className="space-y-2">
+      {parts.map((part, idx) => (
+        <p key={idx}>{part}</p>
+      ))}
+    </div>
+  );
+}
+
 interface QuestionSheetProps {
   question: QuestionItem;
   record?: UserAnswerRecord;
@@ -101,7 +148,7 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
               question.xrayPoints[0]?.wrongSpan,
               true
             )
-          : question.stem}
+          : renderStemWithEmphasis(question.stem)}
       </h3>
 
       {/* 선지 */}
@@ -251,11 +298,14 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
             </div>
           )}
 
-          <div className="space-y-2">
-            <p className="text-[17px] sm:text-[18.5px] text-slate-800 leading-[1.75]">
-              {question.explanation}
-            </p>
-            <p className="text-sm font-semibold text-slate-500 tabular-nums">
+          <div className="bg-[#f8fafc] rounded-xl border border-slate-200 border-l-[5px] border-l-[#1e3a8a] p-5 space-y-2.5">
+            <div className="text-sm font-extrabold text-[#1e3a8a]">
+              선지별 해설
+            </div>
+            <div className="text-[17px] sm:text-[18.5px] text-slate-800 leading-[1.75]">
+              {renderStructuredExplanation(question.explanation)}
+            </div>
+            <p className="text-sm font-semibold text-slate-500 tabular-nums pt-1">
               근거 : {question.referenceBasis}
             </p>
           </div>
@@ -336,7 +386,6 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
 
   const currentQuestion = filteredQuestions[currentIndex] ?? null;
 
-  // 키보드 단축키 (집중 풀이에서 자연스럽게 동작)
   useEffect(() => {
     if (viewMode !== 'single' || !currentQuestion || isOverlayOpen) return;
 
@@ -414,9 +463,8 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* 간결한 단일 컨트롤 바 */}
+      {/* 단일 컨트롤 바 */}
       <div className="bg-white rounded-xl border border-slate-200/90 p-4 sm:px-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3.5">
-        {/* 카테고리 선택 */}
         <div className="flex flex-wrap items-center gap-1.5">
           {(
             [
@@ -450,7 +498,6 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
           })}
         </div>
 
-        {/* 우측: 보기 방식 전환 + 풀이 현황 */}
         <div className="flex flex-wrap items-center justify-between md:justify-end gap-3 text-sm font-bold text-slate-600 tabular-nums border-t md:border-t-0 border-slate-100 pt-2.5 md:pt-0">
           <button
             type="button"
@@ -555,7 +602,6 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
               </div>
             </div>
 
-            {/* 문항 번호 빠른 이동 (정중앙 정렬) */}
             <div className="flex flex-wrap justify-center gap-1.5 pt-2 border-t border-slate-100">
               {filteredQuestions.map((q, idx) => {
                 const rec = answers[q.id];

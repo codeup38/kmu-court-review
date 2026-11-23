@@ -1,7 +1,7 @@
 import { MainViewId } from '../types';
 
 export const OVERARCHING_QUESTION =
-  '오늘 풀 문제들은 모두 “사법부(법원과 헌법재판소)는 어디까지 판단할 수 있고, 어디서 멈춰야 하는가?”를 묻는다.';
+  '발표에서 다룬 네 문제는 모두 “사법부(법원과 헌법재판소)는 어디까지 판단할 수 있고, 어디서 멈춰야 하는가?”를 묻습니다.';
 
 export interface BoundarySummary {
   id: string;
