@@ -457,8 +457,10 @@ export const SchemaView: React.FC<SchemaViewProps> = ({
               <table className="w-full text-left border-collapse text-[16.5px] sm:text-[17.5px] leading-relaxed">
                 <thead>
                   <tr className="bg-slate-200/80 border-b border-slate-400 text-[#0f172a]">
-                    <th className="py-4 px-5 font-extrabold w-1/4">기구명</th>
-                    <th className="py-4 px-5 font-extrabold w-[16%] border-l border-slate-300">
+                    <th className="py-4 px-5 font-extrabold whitespace-nowrap">
+                      기구명
+                    </th>
+                    <th className="py-4 px-5 font-extrabold whitespace-nowrap border-l border-slate-300">
                       역할
                     </th>
                     <th className="py-4 px-5 font-extrabold border-l border-slate-300">
@@ -468,13 +470,13 @@ export const SchemaView: React.FC<SchemaViewProps> = ({
                 </thead>
                 <tbody className="divide-y divide-slate-300 bg-white">
                   <tr>
-                    <td className="py-4 px-5 font-extrabold bg-[#f8fafc]">
+                    <td className="py-4 px-5 font-extrabold bg-[#f8fafc] whitespace-nowrap">
                       법관인사위원회
                       <span className="block text-xs font-semibold text-slate-500 mt-0.5">
                         제25조의2 제1·3항
                       </span>
                     </td>
-                    <td className="py-4 px-5 border-l border-slate-200">
+                    <td className="py-4 px-5 border-l border-slate-200 whitespace-nowrap">
                       인사 <strong>심의</strong>
                     </td>
                     <td className="py-4 px-5 border-l border-slate-200">
@@ -486,13 +488,13 @@ export const SchemaView: React.FC<SchemaViewProps> = ({
                   </tr>
 
                   <tr>
-                    <td className="py-4 px-5 font-extrabold bg-[#f8fafc]">
+                    <td className="py-4 px-5 font-extrabold bg-[#f8fafc] whitespace-nowrap">
                       대법관회의
                       <span className="block text-xs font-semibold text-slate-500 mt-0.5">
                         제16조② · 제17조
                       </span>
                     </td>
-                    <td className="py-4 px-5 border-l border-slate-200">
+                    <td className="py-4 px-5 border-l border-slate-200 whitespace-nowrap">
                       운영 <strong>의결</strong>
                     </td>
                     <td className="py-4 px-5 border-l border-slate-200">
@@ -505,13 +507,13 @@ export const SchemaView: React.FC<SchemaViewProps> = ({
                   </tr>
 
                   <tr>
-                    <td className="py-4 px-5 font-extrabold bg-[#f8fafc]">
+                    <td className="py-4 px-5 font-extrabold bg-[#f8fafc] whitespace-nowrap">
                       합의체와 부(소부)
                       <span className="block text-xs font-semibold text-slate-500 mt-0.5">
                         제7조 제1항
                       </span>
                     </td>
-                    <td className="py-4 px-5 border-l border-slate-200">
+                    <td className="py-4 px-5 border-l border-slate-200 whitespace-nowrap">
                       사건 <strong>재판</strong>
                     </td>
                     <td className="py-4 px-5 border-l border-slate-200">
@@ -638,59 +640,59 @@ export const SchemaView: React.FC<SchemaViewProps> = ({
               <table className="w-full text-left border-collapse text-[16px] sm:text-[17px] leading-relaxed">
                 <thead>
                   <tr className="bg-slate-200/80 border-b border-slate-400 text-[#0f172a]">
-                    <th className="py-3.5 px-4 font-extrabold w-[27%]">
+                    <th className="py-3.5 px-4 font-extrabold whitespace-nowrap">
                       다퉈진 사건
                     </th>
                     <th className="py-3.5 px-4 font-extrabold border-l border-slate-300">
                       헌법재판소가 합헌으로 본 핵심 이유
                     </th>
-                    <th className="py-3.5 px-4 font-extrabold w-[18%] border-l border-slate-300">
+                    <th className="py-3.5 px-4 font-extrabold whitespace-nowrap border-l border-slate-300">
                       실제 결론
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-300 bg-white">
                   <tr>
-                    <td className="py-3.5 px-4 font-extrabold bg-[#f8fafc]">
+                    <td className="py-3.5 px-4 font-extrabold bg-[#f8fafc] whitespace-nowrap">
                       ① 대법원규칙 위임 기준
                     </td>
                     <td className="py-3.5 px-4 border-l border-slate-200">
                       소송절차·실무는 법원이 가장 잘 알므로 <strong>포괄위임금지는 지키되 구체성 요구는 완화됨</strong>
                     </td>
-                    <td className="py-3.5 px-4 border-l border-slate-200">
+                    <td className="py-3.5 px-4 border-l border-slate-200 whitespace-nowrap tabular-nums">
                       <span className="key-underline">합헌</span> (2013헌바370)
                     </td>
                   </tr>
                   <tr>
-                    <td className="py-3.5 px-4 font-extrabold bg-[#f8fafc]">
+                    <td className="py-3.5 px-4 font-extrabold bg-[#f8fafc] whitespace-nowrap">
                       ② 법정형 하한 상향과 양형
                     </td>
                     <td className="py-3.5 px-4 border-l border-slate-200">
                       최소 형량을 높여 집행유예를 줄 수 없게 해도 <strong>법 테두리 내 양형이므로 입법재량</strong>
                     </td>
-                    <td className="py-3.5 px-4 border-l border-slate-200">
+                    <td className="py-3.5 px-4 border-l border-slate-200 whitespace-nowrap tabular-nums">
                       <span className="key-underline">합헌</span> (99헌바43 등)
                     </td>
                   </tr>
                   <tr>
-                    <td className="py-3.5 px-4 font-extrabold bg-[#f8fafc]">
+                    <td className="py-3.5 px-4 font-extrabold bg-[#f8fafc] whitespace-nowrap">
                       ③ 판사 근무평정 · 연임 탈락
                     </td>
                     <td className="py-3.5 px-4 border-l border-slate-200">
                       평가 항목을 대강 예상할 수 있고, <strong>‘현저히 불량’도 뜻이 통하며 10년 누적 평가·소송 보장</strong>
                     </td>
-                    <td className="py-3.5 px-4 border-l border-slate-200">
+                    <td className="py-3.5 px-4 border-l border-slate-200 whitespace-nowrap tabular-nums">
                       <span className="key-underline">합헌</span> (2015헌바331)
                     </td>
                   </tr>
                   <tr>
-                    <td className="py-3.5 px-4 font-extrabold bg-[#f8fafc]">
+                    <td className="py-3.5 px-4 font-extrabold bg-[#f8fafc] whitespace-nowrap">
                       ④ 부실 금융회사 파산관재인
                     </td>
                     <td className="py-3.5 px-4 border-l border-slate-200">
                       청산 관리인 뽑는 일은 <strong>‘누가 옳고 그른지 가리는 재판의 핵심 본질’이 아님</strong>
                     </td>
-                    <td className="py-3.5 px-4 border-l border-slate-200">
+                    <td className="py-3.5 px-4 border-l border-slate-200 whitespace-nowrap tabular-nums">
                       <span className="key-underline">합헌</span> (2001헌가1)
                     </td>
                   </tr>
