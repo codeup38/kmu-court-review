@@ -11,10 +11,10 @@
   html,
   body {
     font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.022em;
     word-break: keep-all;
     overflow-wrap: break-word;
-    background-color: #eef2f6;
+    background-color: #f1f5f9;
     color: #0f172a;
     -webkit-font-smoothing: antialiased;
   }
@@ -25,22 +25,24 @@
 }
 
 @layer components {
-  /* 결정적 구절에만 절제해서 쓰는 형광펜/밑줄 강조 */
+  /* 결정적 한 구절에만 절제해서 쓰는 핵심 밑줄 */
   .key-underline {
     color: #1e3a8a;
     font-weight: 800;
-    background: linear-gradient(to top, #dbeafe 38%, transparent 38%);
+    background: linear-gradient(to top, rgba(147, 197, 253, 0.45) 38%, transparent 38%);
     padding: 0 2px;
   }
 
+  /* 출제자가 비튼 오답 구절 취소선 */
   .err-strike {
     color: #b91c1c;
     text-decoration: line-through;
-    text-decoration-thickness: 2.5px;
+    text-decoration-thickness: 2px;
     text-decoration-color: #b91c1c;
     background-color: #fee2e2;
     padding: 1px 5px;
     border-radius: 4px;
+    font-weight: 600;
   }
 }
 

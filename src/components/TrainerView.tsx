@@ -65,9 +65,9 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
   const isGraded = Boolean(record);
 
   return (
-    <article className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-10 shadow-sm">
+    <article className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-11 shadow-sm">
       {/* 출처 헤더 */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-6 border-b border-slate-200">
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-5 mb-6 border-b border-slate-200">
         <div className="flex flex-wrap items-center gap-3">
           <span className="text-sm font-extrabold bg-[#0f172a] text-white px-3 py-1 rounded-md tabular-nums">
             문항 {question.id}
@@ -89,8 +89,8 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
         )}
       </div>
 
-      {/* 질문 본문 (크고 선명하게 20~24px) */}
-      <h3 className="text-[20px] sm:text-[24px] font-extrabold text-[#0f172a] leading-[1.5] mb-8">
+      {/* 질문 본문 (시원하게 확대) */}
+      <h3 className="text-xl sm:text-[23.5px] font-extrabold text-[#0f172a] leading-[1.52] mb-8">
         {question.type === 'ox' && isGraded && question.answer === 'X'
           ? renderInlineStrike(
               question.stem,
@@ -100,7 +100,7 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
           : question.stem}
       </h3>
 
-      {/* 선지 영역 (17.5~19px) */}
+      {/* 선지 영역 */}
       {question.type === 'mcq' && question.choices ? (
         <div className="space-y-3.5">
           {question.choices.map((choiceText, idx) => {
@@ -112,16 +112,16 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
             );
 
             let boxStyle =
-              'bg-slate-50/80 border-slate-200 hover:bg-white hover:border-[#1e3a8a] text-[#0f172a]';
+              'bg-white border-slate-200/95 hover:border-[#1e3a8a] hover:bg-slate-50/70 text-[#0f172a]';
             if (isGraded) {
               if (isAnswer) {
                 boxStyle =
-                  'bg-emerald-50/70 border-emerald-600 border-l-[5px] text-[#0f172a] shadow-sm';
+                  'bg-[#eff6ff]/70 border-2 border-[#1e3a8a] text-[#0f172a] shadow-sm';
               } else if (isSelected && !isAnswer) {
                 boxStyle =
-                  'bg-[#fef2f2]/80 border-[#b91c1c] border-l-[5px] text-[#0f172a]';
+                  'bg-[#fef2f2]/75 border-2 border-[#b91c1c] text-[#0f172a]';
               } else {
-                boxStyle = 'bg-white border-slate-100 text-slate-500';
+                boxStyle = 'bg-slate-50/50 border-slate-200/70 text-slate-500';
               }
             }
 
@@ -130,32 +130,32 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
                 key={choiceNum}
                 type="button"
                 onClick={() => onSubmit(choiceNum)}
-                className={`w-full text-left rounded-xl px-5 py-4 sm:py-4.5 border transition-all flex items-baseline gap-3.5 ${boxStyle}`}
+                className={`w-full text-left rounded-xl px-5 py-4 sm:py-5 border transition-all flex items-baseline gap-3.5 sm:gap-4 ${boxStyle}`}
               >
                 <span
-                  className={`text-lg sm:text-xl font-extrabold shrink-0 tabular-nums ${
-                    isGraded && isAnswer
-                      ? 'text-emerald-700'
-                      : isGraded && isSelected && !isAnswer
+                  className={`text-lg sm:text-[20px] font-extrabold shrink-0 tabular-nums ${
+                    isGraded && isSelected && !isAnswer
                       ? 'text-[#b91c1c]'
+                      : isGraded && !isAnswer
+                      ? 'text-slate-400'
                       : 'text-[#1e3a8a]'
                   }`}
                 >
                   {CIRCLE_NUMS[idx]}
                 </span>
-                <div className="flex-1 space-y-1.5">
-                  <p className="text-[17px] sm:text-[19px] leading-[1.68] font-medium">
+                <div className="flex-1 space-y-2">
+                  <p className="text-[17px] sm:text-[18.5px] leading-[1.7] font-medium">
                     {renderInlineStrike(choiceText, xray?.wrongSpan, isGraded)}
                   </p>
                   {isGraded && (isAnswer || isSelected) && (
-                    <div className="flex items-center gap-2 pt-0.5 text-xs sm:text-sm font-extrabold">
+                    <div className="flex items-center gap-2 pt-0.5 text-xs font-extrabold">
                       {isAnswer && (
-                        <span className="bg-emerald-700 text-white px-2.5 py-0.5 rounded">
-                          정답 선지
+                        <span className="bg-[#1e3a8a] text-white px-2.5 py-0.5 rounded-md">
+                          정답
                         </span>
                       )}
                       {isSelected && !isAnswer && (
-                        <span className="bg-[#b91c1c] text-white px-2.5 py-0.5 rounded">
+                        <span className="bg-[#b91c1c] text-white px-2.5 py-0.5 rounded-md">
                           내가 고른 선지
                         </span>
                       )}
@@ -173,16 +173,16 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
             const isAnswer = question.answer === oxVal;
 
             let btnStyle =
-              'bg-slate-50 border-slate-200 hover:bg-white hover:border-[#1e3a8a] text-[#0f172a]';
+              'bg-white border-slate-200/95 hover:border-[#1e3a8a] hover:bg-slate-50/70 text-[#0f172a]';
             if (isGraded) {
               if (isAnswer) {
                 btnStyle =
-                  'bg-emerald-50 border-2 border-emerald-600 text-emerald-800 shadow-sm';
+                  'bg-[#eff6ff] border-2 border-[#1e3a8a] text-[#1e3a8a] shadow-sm';
               } else if (isSelected && !isAnswer) {
                 btnStyle =
                   'bg-[#fef2f2] border-2 border-[#b91c1c] text-[#b91c1c]';
               } else {
-                btnStyle = 'bg-white border-slate-200 text-slate-400';
+                btnStyle = 'bg-slate-50/60 border-slate-200 text-slate-400';
               }
             }
 
@@ -191,12 +191,12 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
                 key={oxVal}
                 type="button"
                 onClick={() => onSubmit(oxVal)}
-                className={`rounded-xl py-5 px-6 border transition-all flex items-center justify-center gap-3 ${btnStyle}`}
+                className={`rounded-xl py-5 sm:py-6 px-4 sm:px-6 border transition-all flex items-center justify-center gap-3 ${btnStyle}`}
               >
-                <span className="text-3xl font-extrabold tabular-nums">
+                <span className="text-2xl sm:text-3xl font-extrabold tabular-nums">
                   {oxVal}
                 </span>
-                <span className="text-lg font-bold">
+                <span className="text-[17px] sm:text-lg font-bold">
                   {oxVal === 'O' ? '옳다' : '틀리다'}
                 </span>
               </button>
@@ -205,18 +205,18 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
         </div>
       )}
 
-      {/* 채점 후 해설 (불필요한 박스 중첩 제거 + 시원한 타이포그래피) */}
+      {/* 채점 해설 영역 (과도한 박스를 줄이고 에메랄드/크림슨 강약으로 정돈) */}
       {isGraded && record && (
         <div className="mt-9 pt-8 border-t-2 border-slate-900 space-y-6">
           <div className="flex flex-wrap items-center gap-3">
             <span
-              className={`px-4 py-1.5 rounded-md text-sm sm:text-base font-extrabold text-white ${
+              className={`px-3.5 py-1 rounded-md text-sm sm:text-[15px] font-extrabold text-white ${
                 record.isCorrect ? 'bg-emerald-700' : 'bg-[#b91c1c]'
               }`}
             >
               {record.isCorrect ? '정답입니다' : '오답입니다'}
             </span>
-            <span className="text-lg sm:text-xl font-extrabold text-[#0f172a] tabular-nums">
+            <span className="text-lg sm:text-[19px] font-extrabold text-[#0f172a] tabular-nums">
               정답 :{' '}
               {question.type === 'mcq'
                 ? `${CIRCLE_NUMS[Number(question.answer) - 1]}번`
@@ -224,12 +224,21 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
             </span>
           </div>
 
+          <div className="space-y-2.5">
+            <p className="text-[17.5px] sm:text-[18.5px] text-slate-800 leading-[1.8]">
+              {question.explanation}
+            </p>
+            <p className="text-[15px] font-semibold text-slate-500 tabular-nums">
+              근거 : {question.referenceBasis}
+            </p>
+          </div>
+
           {(question.type === 'mcq' || question.answer === 'X') && (
-            <div className="rounded-r-xl border-l-4 border-l-[#b91c1c] bg-[#fef2f2]/65 px-5 py-4 space-y-2.5">
-              <div className="text-sm font-extrabold text-[#b91c1c]">
-                출제 함정 교정 · {question.trapTag}
+            <div className="rounded-xl bg-[#fef2f2]/65 border-l-4 border-l-[#b91c1c] px-5 py-4 space-y-2.5">
+              <div className="text-sm font-extrabold text-[#991b1b]">
+                출제 함정 대조 · {question.trapTag}
               </div>
-              <div className="space-y-2 text-[16.5px] sm:text-[18px] leading-[1.7]">
+              <div className="space-y-2 text-[16.5px] sm:text-[17.5px] leading-relaxed">
                 {question.xrayPoints.map((xr, idx) => (
                   <div key={idx} className="text-[#0f172a]">
                     {xr.choiceNum && (
@@ -239,7 +248,7 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
                     )}
                     <del className="err-strike">{xr.wrongSpan}</del>
                     <span className="mx-2 text-slate-400 font-bold">→</span>
-                    <strong className="text-[#1e3a8a] font-extrabold">
+                    <strong className="font-extrabold text-[#1e3a8a]">
                       {xr.rightSpan}
                     </strong>
                     <span className="text-sm font-semibold text-slate-500 ml-2 tabular-nums">
@@ -251,27 +260,18 @@ const QuestionSheet: React.FC<QuestionSheetProps> = ({
             </div>
           )}
 
-          <div className="space-y-2">
-            <p className="text-[17px] sm:text-[18.5px] text-slate-800 leading-[1.8]">
-              {question.explanation}
-            </p>
-            <p className="text-sm sm:text-[15px] font-semibold text-slate-500 tabular-nums">
-              근거 조문·판례 : {question.referenceBasis}
-            </p>
-          </div>
-
           <div className="pt-2 flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={onOpenExplainAI}
-              className="py-2.5 px-5 rounded-xl text-sm sm:text-[15px] font-extrabold bg-[#0f172a] text-white hover:bg-[#1e3a8a] transition-colors"
+              className="px-4 py-2.5 rounded-xl text-[15px] font-bold bg-[#0f172a] text-white hover:bg-[#1e3a8a] transition-colors"
             >
               이 문제 AI에게 질문하기
             </button>
             <button
               type="button"
               onClick={onOpenVariantAI}
-              className="py-2.5 px-5 rounded-xl text-sm sm:text-[15px] font-extrabold bg-[#eff6ff] text-[#1e3a8a] border border-[#93c5fd] hover:bg-[#1e3a8a] hover:text-white transition-colors"
+              className="px-4 py-2.5 rounded-xl text-[15px] font-bold bg-[#eff6ff] text-[#1e3a8a] border border-[#93c5fd] hover:bg-[#1e3a8a] hover:text-white transition-colors"
             >
               비슷한 변형문제 더 풀기
             </button>
@@ -413,7 +413,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* 상단 필터 바 */}
+      {/* 단일 컨트롤 바 */}
       <div className="bg-white rounded-2xl border border-slate-200/90 p-4 sm:px-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3.5">
         <div className="flex flex-wrap items-center gap-2">
           {(
@@ -439,7 +439,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
                 className={`px-4 py-2 rounded-xl text-[15px] font-bold transition-colors tabular-nums ${
                   active
                     ? 'bg-[#0f172a] text-white'
-                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    : 'bg-slate-100/80 text-slate-600 hover:bg-slate-200/70 hover:text-slate-900'
                 }`}
               >
                 {f.label}
@@ -448,13 +448,13 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
           })}
         </div>
 
-        <div className="flex flex-wrap items-center justify-between md:justify-end gap-3 text-[15px] font-bold text-slate-600 tabular-nums border-t md:border-t-0 border-slate-100 pt-2.5 md:pt-0">
+        <div className="flex flex-wrap items-center justify-between md:justify-end gap-3.5 text-[15px] font-bold text-slate-600 tabular-nums border-t md:border-t-0 border-slate-100 pt-2.5 md:pt-0">
           <button
             type="button"
             onClick={() =>
               setViewMode((prev) => (prev === 'single' ? 'list' : 'single'))
             }
-            className="text-sm font-extrabold text-[#1e3a8a] hover:underline"
+            className="text-sm sm:text-[15px] font-bold text-[#1e3a8a] hover:underline"
           >
             {viewMode === 'single' ? '전체 펼쳐보기' : '한 문제씩 보기'}
           </button>
@@ -483,7 +483,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
                   setFilter('all');
                   setConfirmReset(false);
                 }}
-                className="px-2.5 py-0.5 rounded text-xs font-extrabold bg-[#b91c1c] text-white"
+                className="px-2.5 py-1 rounded text-xs font-extrabold bg-[#b91c1c] text-white"
               >
                 확인
               </button>
@@ -499,6 +499,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
         </div>
       </div>
 
+      {/* 한 문제씩 보기 */}
       {viewMode === 'single' && (
         <div className="space-y-5">
           {currentQuestion && (
@@ -513,6 +514,7 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
             />
           )}
 
+          {/* 정중앙 3열 페이지네이션 */}
           <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
             <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
               <div className="justify-self-start">
@@ -550,22 +552,23 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
               </div>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-1.5 pt-2.5 border-t border-slate-100">
+            <div className="flex flex-wrap justify-center gap-1.5 pt-3 border-t border-slate-100">
               {filteredQuestions.map((q, idx) => {
                 const rec = answers[q.id];
                 const isCurrent = idx === currentIndex;
                 let pill = 'bg-slate-100 text-slate-600 hover:bg-slate-200';
-                if (rec?.isCorrect) pill = 'bg-emerald-50 text-emerald-800';
+                if (rec?.isCorrect)
+                  pill = 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200';
                 else if (rec && !rec.isCorrect)
-                  pill = 'bg-[#fef2f2] text-[#b91c1c]';
+                  pill = 'bg-[#fef2f2] text-[#b91c1c] ring-1 ring-[#fca5a5]';
 
                 return (
                   <button
                     key={q.id}
                     type="button"
                     onClick={() => setCurrentIndex(idx)}
-                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg text-xs sm:text-sm font-extrabold tabular-nums transition-all ${pill} ${
-                      isCurrent ? 'ring-2 ring-[#0f172a]' : ''
+                    className={`w-9 h-9 rounded-lg text-xs sm:text-sm font-extrabold tabular-nums transition-all ${pill} ${
+                      isCurrent ? '!ring-2 !ring-[#0f172a]' : ''
                     }`}
                   >
                     {q.id}
@@ -577,8 +580,9 @@ export const TrainerView: React.FC<TrainerViewProps> = ({
         </div>
       )}
 
+      {/* 전체 펼쳐보기 */}
       {viewMode === 'list' && (
-        <div className="space-y-6">
+        <div className="space-y-7">
           {filteredQuestions.map((q) => (
             <QuestionSheet
               key={q.id}

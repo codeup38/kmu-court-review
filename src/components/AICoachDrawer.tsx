@@ -88,7 +88,7 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
     <div className="fixed inset-0 z-50 flex justify-end">
       <div
         onClick={onClose}
-        className="fixed inset-0 bg-slate-900/45 backdrop-blur-[1px]"
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-[1px]"
       />
 
       <aside
@@ -102,13 +102,13 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
               AI 질문 템플릿
             </h2>
             <p className="text-sm text-slate-500 leading-relaxed">
-              사법부 복습에 최적화된 질문 프롬프트를 복사해 AI에 붙여넣어 활용하는 도구입니다.
+              내 풀이 상황에 맞춘 복습용 질문 프롬프트를 복사해 AI 채팅창에 붙여넣는 도구입니다.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-900 shrink-0"
+            className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:text-slate-900 shrink-0"
             aria-label="닫기"
           >
             <X className="w-5 h-5" />
@@ -147,10 +147,10 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
                         : 'bg-white border-slate-200 hover:border-slate-300'
                     }`}
                   >
-                    <div className="text-base font-extrabold text-[#0f172a] mb-0.5">
+                    <div className="text-base font-extrabold text-[#0f172a] mb-1">
                       {tpl.title}
                     </div>
-                    <p className="text-sm text-slate-600 leading-relaxed">
+                    <p className="text-[14.5px] text-slate-600 leading-relaxed">
                       {tpl.desc}
                     </p>
                   </button>
@@ -195,7 +195,7 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
               {copiedState ? (
                 <>
                   <Check className="w-5 h-5" />
-                  <span>프롬프트 복사 완료 — AI 채팅창에 붙여넣기 하세요</span>
+                  <span>복사 완료 — 아래 AI에 바로 붙여넣기 하세요</span>
                 </>
               ) : (
                 <>
@@ -211,7 +211,7 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
               className="w-full py-1.5 text-xs sm:text-sm font-bold text-slate-500 hover:text-slate-900 flex items-center justify-center gap-1"
             >
               <span>
-                {previewOpen ? '프롬프트 전문 닫기' : '복사될 프롬프트 전문 확인하기'}
+                {previewOpen ? '프롬프트 전문 닫기' : '복사될 프롬프트 전문 미리보기'}
               </span>
               {previewOpen ? (
                 <ChevronUp className="w-4 h-4" />
@@ -221,20 +221,23 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
             </button>
 
             {previewOpen && (
-              <pre className="w-full max-h-56 overflow-y-auto rounded-xl bg-slate-900 text-slate-100 p-4 text-[13px] leading-relaxed whitespace-pre-wrap font-sans">
+              <pre className="w-full max-h-56 overflow-y-auto rounded-xl bg-slate-900 text-slate-100 p-4 text-xs sm:text-[13px] leading-relaxed whitespace-pre-wrap font-sans">
                 {generatedPrompt}
               </pre>
             )}
           </div>
 
-          {/* 4-A. 학교 무료 제공 AI 전용 박스 */}
-          <div className="rounded-xl border-2 border-[#1e3a8a]/25 bg-[#eff6ff]/75 p-5 space-y-3.5">
+          {/* 4. 학교 무료 제공 AI 전용 안내 카드 */}
+          <div className="rounded-2xl border border-[#93c5fd] bg-[#eff6ff]/70 p-5 space-y-3.5">
             <div className="space-y-1.5">
               <div className="text-[15.5px] font-extrabold text-[#1e3a8a]">
-                학교 무료 제공 AI로 바로 질문하기 (추천)
+                학교 무료 제공 AI(FactChat)로 무료 복습하기
               </div>
-              <p className="text-[14.5px] text-slate-800 leading-relaxed font-medium">
-                학교 무료 제공 AI(FactChat)에 <strong>학교 계정(온국민 포털)으로 로그인만 하면</strong> 별도 비용 없이 유료 AI로 바로 복습할 수 있습니다.
+              <p className="text-[14.5px] text-slate-800 leading-relaxed">
+                학교 계정(온국민 포털)으로 로그인만 하면 별도 결제 없이 유료 AI 모델들로 바로 복습·질문할 수 있습니다.
+              </p>
+              <p className="text-[13.5px] text-[#1e3a8a] font-bold leading-relaxed">
+                ※ 학교 AI 안에서 무제한 무료 모델 대신 ChatGPT 6.2 Sol, Claude Opus 5.5 등 최신 모델 사용을 권장합니다.
               </p>
             </div>
 
@@ -250,19 +253,12 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
               <span>학교 무료 제공 AI 열기 (온국민 포털 로그인)</span>
               <ExternalLink className="w-4 h-4 shrink-0" />
             </a>
-
-            <p className="text-xs sm:text-[13.5px] text-slate-600 leading-relaxed bg-white/80 rounded-lg px-3.5 py-2.5 border border-[#93c5fd]/60">
-              <strong className="text-[#1e3a8a] font-extrabold mr-1">
-                학교 AI 모델 선택 팁 :
-              </strong>
-              무제한 무료 모델 대신 <strong>ChatGPT 6.2 Sol, Claude Opus 5.5 등 최신 모델</strong> 사용을 권장합니다.
-            </p>
           </div>
 
-          {/* 4-B. 개인 구독 AI 계정 영역 (완전히 분리) */}
-          <div className="pt-2 border-t border-slate-200 space-y-2">
+          {/* 5. 카드 바깥으로 분리된 개인 상용 AI 영역 */}
+          <div className="pt-2 border-t border-slate-100 space-y-2">
             <span className="text-xs sm:text-sm font-semibold text-slate-500 block">
-              개인 구독 AI 계정에 붙여넣기
+              개인 구독 중인 상용 AI에 붙여넣기
             </span>
             <div className="grid grid-cols-3 gap-2">
               {PERSONAL_AI_LINKS.map((item) => (
@@ -274,10 +270,10 @@ export const AICoachDrawer: React.FC<AICoachDrawerProps> = ({
                   onClick={() => {
                     if (!copiedState) copyPromptToClipboard(generatedPrompt);
                   }}
-                  className="inline-flex items-center justify-center gap-1 px-2.5 py-2 rounded-lg text-xs sm:text-sm font-bold bg-slate-50 border border-slate-300 text-slate-700 hover:bg-white hover:border-[#0f172a] hover:text-[#0f172a]"
+                  className="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-lg text-xs sm:text-sm font-bold bg-slate-50 border border-slate-200 text-slate-700 hover:border-[#0f172a] hover:text-[#0f172a]"
                 >
                   <span>{item.label}</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
+                  <ExternalLink className="w-3 h-3" />
                 </a>
               ))}
             </div>
