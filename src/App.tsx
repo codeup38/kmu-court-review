@@ -201,9 +201,20 @@ export const App: React.FC = () => {
       {/* 하단 푸터 (모바일 iOS 플로팅 주소창 대비 하단 안전 여백 확보) */}
       <footer className="bg-white border-t border-slate-200 mt-4 sm:mt-10 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:pb-0">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-1.5 sm:gap-2 text-xs sm:text-sm text-slate-500">
-          <span className="font-semibold">
-            헌법원리와제도 · 사법부 기출·사례 복습
-          </span>
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+            <span className="font-semibold">
+              헌법원리와제도 · 사법부 기출·사례 복습
+            </span>
+            <span className="text-slate-300">|</span>
+            <a
+              href="/slides.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-[#1e3a8a] hover:underline transition-colors"
+            >
+              발표 교안(PDF)
+            </a>
+          </div>
           <div className="flex items-center gap-2 font-medium">
             <span className="text-slate-700 font-semibold">김시우</span>
             <span className="text-slate-300">|</span>
