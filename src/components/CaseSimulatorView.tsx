@@ -102,10 +102,10 @@ export const CaseSimulatorView: React.FC<CaseSimulatorViewProps> = ({
 
   const handleOpenGuidedQA = () => {
     onTriggerInstantPrompt({
-      title: '해외파병 사례형 — 백지 상태 단계별 AI 문답',
-      subtitle: '모범답안 스포일러 없이 1단계부터 차근차근 연습',
+      title: '해외파병 사례형 — 탑다운 전체 지도 & 단계별 학습',
+      subtitle: '전체 관문 구조도(뼈대)를 먼저 보고 핵심 갈림길 1:1 점검',
       placeholder:
-        '예: 어디서부터 목차를 잡아야 할지 감이 안 잡혀서 1단계부터 천천히 물어봐 줘 (선택)',
+        '예: 통치행위 심사 범위랑 국회·개별의원 청구자격이 나뉘는 부분이 특히 헷갈려 (선택)',
       buildPrompt: (userNote: string) => buildCaseGuidedPrompt(userNote),
     });
   };

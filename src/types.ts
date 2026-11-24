@@ -74,7 +74,11 @@ export interface StudyState {
   coachCustomMemo: string;
 }
 
-export type CoachPresetId = 'wrong-traps' | 'variant-quiz' | 'case-feedback';
+export type CoachPresetId =
+  | 'wrong-traps'
+  | 'variant-quiz'
+  | 'case-feedback'
+  | 'general-topdown';
 
 export interface InstantPromptModalData {
   title: string;
